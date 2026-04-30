@@ -1,0 +1,7 @@
+CREATE TABLE Derslik (
+    DerslikID INT IDENTITY(1,1) PRIMARY KEY,
+    Ad NVARCHAR(50),
+    Kapasite INT NOT NULL,
+    Tip NVARCHAR(50),
+    Aktif BIT DEFAULT 1
+);
