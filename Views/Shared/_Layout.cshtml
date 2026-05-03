@@ -28,48 +28,47 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                        <!-- ANA SAYFA -->
+                    <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link active" asp-area="" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Anasayfa</a>
                         </li>
 
-                        <!-- MODÜL 1: YÖNETİCİ AYARLARI (Açılır Menü) -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="tanimlamalarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-gear me-1"></i>Tanımlamalar
-                            </a>
-                            <ul class="dropdown-menu shadow" aria-labelledby="tanimlamalarDropdown">
-                                <li><a class="dropdown-item" asp-controller="Oturum" asp-action="Index">Oturum Yönetimi</a></li>
-                                <li><a class="dropdown-item" asp-controller="Derslik" asp-action="Index">Derslik (Mekan) Yönetimi</a></li>
-                                <li><a class="dropdown-item" asp-controller="Ders" asp-action="Index">Bölüm ve Dersler</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-controller="Personel" asp-action="Index">Personel Yönetimi</a></li>
-                                <li><a class="dropdown-item" asp-controller="Personel" asp-action="Mazeretler">Mazeret / İzin İşlemleri</a></li>
-                            </ul>
-                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <!-- Herkesin görebileceği kısımlar -->
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Sinav" asp-action="Program">Sınav Programı</a>
+                            </li>
 
-                        <!-- MODÜL 2: AKILLI SALON HESAPLAMA -->
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Sinav" asp-action="Planla">
-                                <i class="bi bi-diagram-3 me-1"></i>Sınav Planlama
-                            </a>
-                        </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <!-- Sadece Admin'in (App_Admin) görebileceği kısımlar -->
+                                <li class="nav-item">
+                                    <a class="nav-link text-danger fw-bold" asp-controller="Sinav" asp-action="Olustur">Yeni Sınav / Salon Ata</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Personel" asp-action="Liste">Personel Yönetimi</a>
+                                </li>
+                            }
+                        }
+                    </ul>
 
-                        <!-- MODÜL 3: HAVUZ SİSTEMİ VE ATAMA -->
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Gozetmen" asp-action="Index">
-                                <i class="bi bi-person-badge me-1"></i>Gözetmen Atama
-                            </a>
-                        </li>
-
-                        <!-- RAPORLAMA: SINAV TAKVİMİ -->
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Rapor" asp-action="Takvim">
-                                <i class="bi bi-table me-1"></i>Sınav Takvimi
-                            </a>
-                        </li>
+                    <ul class="navbar-nav">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-primary">Merhaba, @User.Identity.Name (@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-link text-dark" asp-controller="Account" asp-action="Logout">Çıkış</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Giriş Yap</a>
+                            </li>
+                        }
                     </ul>
 
                     <!-- Sağ Taraf (Kullanıcı Girişi / Admin Göstergesi) -->

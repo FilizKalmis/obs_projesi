@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using OBS_Projesi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 // MSSQL Baðlantýsýný Servislere Ekle
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 1. Authentication Servisini Ekle
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login"; // Giriþ sayfasý yolu
+        options.AccessDeniedPath = "/Account/AccessDenied"; // Yetkisiz eriþim yolu
+    });
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -25,7 +34,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication(); // Kim kimdir?
+app.UseAuthorization(); // Kim neyi yapabilir?
 
 app.MapControllerRoute(
     name: "default",

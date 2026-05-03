@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OBS_Projesi.Data;
 using OBS_Projesi.Models;
 using System.Linq;
 
+
 namespace OBS_Projesi.Controllers
 {
+    [Authorize]
     public class HesapController : Controller
     {
         private readonly AppDbContext _context;

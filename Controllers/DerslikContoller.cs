@@ -1,9 +1,10 @@
 ﻿namespace OBS_Projesi.Controllers;
 using global::OBS_Projesi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-
-    public class DerslikController : Controller
+[Authorize]
+public class DerslikController : Controller
     {
         // Derslik Listesi (App_Viewer yetkisi için uygun)
         public IActionResult Index()

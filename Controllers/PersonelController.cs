@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using OBS_Projesi.Data;
 using OBS_Projesi.Models;
@@ -6,6 +7,7 @@ using System.Linq;
 
 namespace OBS_Projesi.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class PersonelController : Controller
     {
         private readonly AppDbContext _context;
