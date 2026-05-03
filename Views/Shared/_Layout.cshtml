@@ -1,49 +1,107 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - OBS_Projesi</title>
+    <title>@ViewData["Title"] - OBS Sınav Planlama</title>
+
+    <!-- Yerel Bootstrap CSS (Projende var olan) -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Yerel Özel CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/OBS_Projesi.styles.css" asp-append-version="true" />
+    <!-- Bootstrap İkonları (Görsellik katmak için) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
-<body>
+<body class="bg-light">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <!-- Modern, koyu mavi (bg-primary) bir navigasyon menüsü -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">OBS_Projesi</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <!-- Proje Logo/İsmi -->
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-calendar-check me-2"></i>Sınav Planlama Sistemi
+                </a>
+
+                <!-- Mobil görünümler için açılır menü butonu -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Menüyü Aç">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        <!-- ANA SAYFA -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link active" asp-area="" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
                         </li>
+
+                        <!-- MODÜL 1: YÖNETİCİ AYARLARI (Açılır Menü) -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="tanimlamalarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gear me-1"></i>Tanımlamalar
+                            </a>
+                            <ul class="dropdown-menu shadow" aria-labelledby="tanimlamalarDropdown">
+                                <li><a class="dropdown-item" asp-controller="Oturum" asp-action="Index">Oturum Yönetimi</a></li>
+                                <li><a class="dropdown-item" asp-controller="Derslik" asp-action="Index">Derslik (Mekan) Yönetimi</a></li>
+                                <li><a class="dropdown-item" asp-controller="Ders" asp-action="Index">Bölüm ve Dersler</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-controller="Personel" asp-action="Index">Personel Yönetimi</a></li>
+                                <li><a class="dropdown-item" asp-controller="Personel" asp-action="Mazeretler">Mazeret / İzin İşlemleri</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- MODÜL 2: AKILLI SALON HESAPLAMA -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Sinav" asp-action="Planla">
+                                <i class="bi bi-diagram-3 me-1"></i>Sınav Planlama
+                            </a>
+                        </li>
+
+                        <!-- MODÜL 3: HAVUZ SİSTEMİ VE ATAMA -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Gozetmen" asp-action="Index">
+                                <i class="bi bi-person-badge me-1"></i>Gözetmen Atama
+                            </a>
+                        </li>
+
+                        <!-- RAPORLAMA: SINAV TAKVİMİ -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Rapor" asp-action="Takvim">
+                                <i class="bi bi-table me-1"></i>Sınav Takvimi
+                            </a>
                         </li>
                     </ul>
+
+                    <!-- Sağ Taraf (Kullanıcı Girişi / Admin Göstergesi) -->
+                    <div class="d-flex text-white align-items-center">
+                        <i class="bi bi-person-circle fs-5 me-2"></i>
+                        <span>Admin Kullanıcısı</span>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    <!-- Sayfa İçeriğinin Geleceği Ana Konteyner -->
+    <div class="container-fluid px-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - OBS_Projesi - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Alt Bilgi (Footer) -->
+    <footer class="border-top footer text-muted bg-white mt-auto py-3">
+        <div class="container text-center">
+            &copy; 2026 - YZM 2126 Sınav Planlama ve Gözetmen Atama Sistemi
         </div>
     </footer>
+
+    <!-- Yerel JS Kütüphaneleri (Projende var olan) -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- İlgili sayfalarda özel JS kodları kullanabilmek için -->
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

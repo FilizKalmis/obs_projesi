@@ -1,10 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OBS_Projesi.Models
 {
+    [Table("Ders")]
     public class Ders
     {
         // Birincil anahtar
+        [Key]
+
         public int DersID { get; set; }
 
         // Ders kodu: Örn. YZM 2126

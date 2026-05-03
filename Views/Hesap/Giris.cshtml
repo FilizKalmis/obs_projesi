@@ -1,0 +1,81 @@
+﻿@model OBS_Projesi.Models.GirisViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giriş - OBS Sınav Planlama Sistemi</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center align-items-center vh-100">
+            <div class="col-md-5 col-lg-4">
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <div class="card-header bg-primary text-white text-center py-4">
+                        <i class="bi bi-shield-lock-fill fs-1"></i>
+                        <h4 class="fw-bold mt-2">OBS GİRİŞ</h4>
+                        <p class="small mb-0">Sınav Planlama ve Gözetmen Sistemi</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <form asp-action="Giris" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="KullaniciAdi" class="form-label small fw-bold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0 text-muted">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <input asp-for="KullaniciAdi" class="form-control border-start-0" placeholder="Adınız" />
+                                </div>
+                                <span asp-validation-for="KullaniciAdi" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Sifre" class="form-label small fw-bold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0 text-muted">
+                                        <i class="bi bi-key"></i>
+                                    </span>
+                                    <input asp-for="Sifre" class="form-control border-start-0" placeholder="••••••" />
+                                </div>
+                                <span asp-validation-for="Sifre" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Rol" class="form-label small fw-bold"></label>
+                                <select asp-for="Rol" class="form-select bg-light border-0">
+                                    <option value="Admin">Yönetici (App_Admin)</option>
+                                    <option value="Gozetmen">Gözetmen (App_Viewer)</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid shadow-sm">
+                                <button type="submit" class="btn btn-primary py-2 fw-bold">Giriş Yap</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center bg-white border-0 py-3">
+                        <span class="text-muted x-small">© 2026 OBS Planlama Modülü</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</body>
+</html>
