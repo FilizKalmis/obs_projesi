@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     --bg-main: #111827;
     --bg-panel: #151c24;
     --bg-panel-soft: #1f2937;
@@ -586,4 +586,138 @@ a {
     background: rgba(25, 135, 84, 0.14);
     color: #8ee6b0;
     border: 1px solid rgba(25, 135, 84, 0.22);
+}
+/* =========================
+   GENEL KOYU TEMA CARD / TABLE FIX
+   Bootstrap beyazlarını ezer
+   ========================= */
+
+.content-area .card,
+.content-area .table-card,
+.content-area .log-card {
+    background: rgba(15, 23, 42, 0.92) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 18px !important;
+    color: #e5ecf8 !important;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.content-area .card-header,
+.content-area .card-footer {
+    background: rgba(30, 41, 59, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+
+    .content-area .card-header h1,
+    .content-area .card-header h2,
+    .content-area .card-header h3,
+    .content-area .card-header h4,
+    .content-area .card-header h5,
+    .content-area .card-header h6 {
+        color: #ffffff !important;
+        margin: 0;
+    }
+
+.content-area .table {
+    margin-bottom: 0;
+    color: #e5ecf8 !important;
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+    .content-area .table thead,
+    .content-area .table thead tr,
+    .content-area .table thead th {
+        background: rgba(30, 41, 59, 0.95) !important;
+        color: #dbe7ff !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        font-weight: 700;
+    }
+
+    .content-area .table tbody,
+    .content-area .table tbody tr,
+    .content-area .table tbody td {
+        background: rgba(15, 23, 42, 0.75) !important;
+        color: #dbe7ff !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+        .content-area .table tbody tr:hover td {
+            background: rgba(37, 99, 235, 0.12) !important;
+        }
+
+.content-area .text-muted {
+    color: #a9b4c7 !important;
+}
+
+.content-area .empty-state,
+.content-area .no-data,
+.content-area .table-empty {
+    color: #a9b4c7 !important;
+    background: rgba(15, 23, 42, 0.75) !important;
+    text-align: center;
+    padding: 32px;
+}
+
+/* Log sayfası istatistik kartları */
+.log-stats,
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin: 24px 0;
+}
+
+.log-stat-card,
+.stat-card {
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    color: #e5ecf8;
+}
+
+    .log-stat-card span,
+    .stat-card span {
+        display: block;
+        color: #a9b4c7;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .log-stat-card strong,
+    .stat-card strong {
+        display: block;
+        color: #ffffff;
+        font-size: 1.8rem;
+        line-height: 1;
+    }
+
+/* Sayfa başlığı */
+.page-title,
+.log-page-title {
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.page-subtitle,
+.log-page-subtitle {
+    color: #a9b4c7;
+    margin-bottom: 0;
+}
+
+/* Mobil */
+@media (max-width: 768px) {
+    .log-stats,
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .content-area .table {
+        font-size: 0.85rem;
+    }
 }
