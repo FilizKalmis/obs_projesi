@@ -1,23 +1,29 @@
 ﻿@model OBS_Projesi.Models.GozetmenAtama
 
 @{
-    ViewData["Title"] = "Yeni Gözetmen Ataması";
+    ViewData["Title"] = "Gözetmen Atamasını Düzenle";
 }
 
 <div class="container-fluid px-4 py-4">
 
     <div class="mb-4">
-        <h2 class="fw-bold mb-1">Yeni Gözetmen Ataması</h2>
+        <h2 class="fw-bold mb-1">Gözetmen Atamasını Düzenle</h2>
         <p class="text-muted mb-0">
-            Seçilen sınav salonuna uygun bir gözetmen atayın.
+            Sınav salonuna atanmış gözetmeni veya sınav salonunu güncelleyin.
         </p>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
 
-            <form asp-controller="GozetmenAtama" asp-action="Ekle" method="post">
+            <form asp-controller="GozetmenAtama"
+                  asp-action="Duzenle"
+                  asp-route-id="@Model.AtamaID"
+                  method="post">
+
                 @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="AtamaID" />
 
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
@@ -61,13 +67,12 @@
                     <div>
                         Sistem aynı tarih ve oturumda görev çakışmasını, personel mazeretini
                         ve arka arkaya 3 oturum sınırını kontrol eder.
-                        Personel listesinde görev sayısı az olanlar daha üstte gösterilir.
                     </div>
                 </div>
 
                 <div class="d-flex gap-2 mt-4">
                     <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-check-circle me-1"></i>Atama Yap
+                        <i class="bi bi-save me-1"></i>Güncelle
                     </button>
 
                     <a asp-controller="GozetmenAtama"

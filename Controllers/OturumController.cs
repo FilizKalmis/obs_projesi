@@ -25,6 +25,7 @@ namespace OBS_Projesi.Controllers
             return View(oturumlar);
         }
 
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public IActionResult Ekle()
         {
@@ -36,14 +37,28 @@ namespace OBS_Projesi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Ekle([Bind("Tanim,BaslangicSaat,BitisSaat")] Oturum oturum)
         {
+            SaatAraliginiKontrolEt(oturum);
+
             if (!ModelState.IsValid)
             {
+                return View(oturum);
+            }
+
+            bool ayniSaatAraligindaOturumVarMi = await _context.Oturumlar
+                .AnyAsync(o =>
+                    o.BaslangicSaat == oturum.BaslangicSaat &&
+                    o.BitisSaat == oturum.BitisSaat);
+
+            if (ayniSaatAraligindaOturumVarMi)
+            {
+                ModelState.AddModelError("", "Bu saat aralığında zaten bir oturum tanımlı.");
                 return View(oturum);
             }
 
             _context.Oturumlar.Add(oturum);
             await _context.SaveChangesAsync();
 
+            TempData["SuccessMessage"] = "Oturum başarıyla eklendi.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -55,7 +70,8 @@ namespace OBS_Projesi.Controllers
 
             if (oturum == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Düzenlenecek oturum bulunamadı.";
+                return RedirectToAction(nameof(Index));
             }
 
             return View(oturum);
@@ -64,36 +80,88 @@ namespace OBS_Projesi.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Duzenle(int id, [Bind("OturumID,Tanim,BaslangicSaat,BitisSaat")] Oturum oturum)
+        public async Task<IActionResult> Duzenle(
+            int id,
+            [Bind("OturumID,Tanim,BaslangicSaat,BitisSaat")] Oturum oturum)
         {
             if (id != oturum.OturumID)
             {
                 return NotFound();
             }
 
+            SaatAraliginiKontrolEt(oturum);
+
             if (!ModelState.IsValid)
             {
                 return View(oturum);
             }
 
-            try
-            {
-                _context.Update(oturum);
-                await _context.SaveChangesAsync();
+            var mevcutOturum = await _context.Oturumlar.FindAsync(id);
 
+            if (mevcutOturum == null)
+            {
+                TempData["ErrorMessage"] = "Güncellenecek oturum bulunamadı.";
                 return RedirectToAction(nameof(Index));
             }
-            catch (DbUpdateConcurrencyException)
+
+            bool ayniSaatAraligindaBaskaOturumVarMi = await _context.Oturumlar
+                .AnyAsync(o =>
+                    o.OturumID != id &&
+                    o.BaslangicSaat == oturum.BaslangicSaat &&
+                    o.BitisSaat == oturum.BitisSaat);
+
+            if (ayniSaatAraligindaBaskaOturumVarMi)
             {
-                bool oturumVarMi = await _context.Oturumlar
-                    .AnyAsync(o => o.OturumID == oturum.OturumID);
+                ModelState.AddModelError("", "Bu saat aralığında başka bir oturum zaten tanımlı.");
+                return View(oturum);
+            }
 
-                if (!oturumVarMi)
-                {
-                    return NotFound();
-                }
+            mevcutOturum.Tanim = oturum.Tanim;
+            mevcutOturum.BaslangicSaat = oturum.BaslangicSaat;
+            mevcutOturum.BitisSaat = oturum.BitisSaat;
 
-                throw;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Oturum başarıyla güncellendi.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Sil(int id)
+        {
+            var oturum = await _context.Oturumlar
+                .Include(o => o.Sinavlar)
+                .FirstOrDefaultAsync(o => o.OturumID == id);
+
+            if (oturum == null)
+            {
+                TempData["ErrorMessage"] = "Silinecek oturum bulunamadı.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            bool oturumSinavdaKullaniliyorMu = await _context.Sinavlar
+                .AnyAsync(s => s.OturumID == id);
+
+            if (oturumSinavdaKullaniliyorMu)
+            {
+                TempData["ErrorMessage"] = "Bu oturuma bağlı sınav bulunduğu için oturum silinemez. Önce ilgili sınavları silmeniz veya başka oturuma taşımanız gerekir.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.Oturumlar.Remove(oturum);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Oturum başarıyla silindi.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        private void SaatAraliginiKontrolEt(Oturum oturum)
+        {
+            if (oturum.BitisSaat <= oturum.BaslangicSaat)
+            {
+                ModelState.AddModelError("", "Bitiş saati başlangıç saatinden sonra olmalıdır.");
             }
         }
     }
