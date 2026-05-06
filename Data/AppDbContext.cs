@@ -26,33 +26,38 @@ namespace OBS_Projesi.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // EF Core'a Sinav tablosunda trigger olduðunu söylüyoruz.
+            // Aksi halde SQL Server "OUTPUT clause + trigger" hatasý veriyor.
+            modelBuilder.Entity<Sinav>()
+                .ToTable("Sinav", tb => tb.HasTrigger("trg_SinavGuncellemeLog"));
+
             // EF Core'a SinavSalonu tablosunda trigger olduðunu söylüyoruz.
             // Aksi halde SQL Server "OUTPUT clause + trigger" hatasý veriyor.
             modelBuilder.Entity<SinavSalonu>()
                 .ToTable("SinavSalonu", tb => tb.HasTrigger("trg_SalonCakismaEngelle"));
 
-            // SinavLog ile Sinav arasýndaki silme döngüsünü kýrýyoruz
+            // SinavLog ile Sinav arasýndaki silme döngüsünü kýrýyoruz.
             modelBuilder.Entity<SinavLog>()
                 .HasOne(l => l.Sinav)
                 .WithMany()
                 .HasForeignKey(l => l.SinavID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // SinavLog ile Personel arasýndaki silme döngüsünü kýrýyoruz
+            // SinavLog ile Personel arasýndaki silme döngüsünü kýrýyoruz.
             modelBuilder.Entity<SinavLog>()
                 .HasOne(l => l.DegistirenPersonel)
                 .WithMany()
                 .HasForeignKey(l => l.PersonelID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // GozetmenAtama ile SinavSalonu arasýndaki silme döngüsünü kýrýyoruz
+            // GozetmenAtama ile SinavSalonu arasýndaki silme döngüsünü kýrýyoruz.
             modelBuilder.Entity<GozetmenAtama>()
                 .HasOne(ga => ga.SinavSalonu)
                 .WithMany(ss => ss.GozetmenAtamalari)
                 .HasForeignKey(ga => ga.SinavSalonuID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // GozetmenAtama ile Personel arasýndaki silme döngüsünü kýrýyoruz
+            // GozetmenAtama ile Personel arasýndaki silme döngüsünü kýrýyoruz.
             modelBuilder.Entity<GozetmenAtama>()
                 .HasOne(ga => ga.Personel)
                 .WithMany()

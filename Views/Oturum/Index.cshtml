@@ -1,57 +1,113 @@
-<<<<<<< HEAD
-﻿@model IEnumerable<OBS_Projesi.Models.Oturum>
-
-@{
-    ViewData["Title"] = "Oturum Listesi";
-}
-
-<h2>Oturum Listesi</h2>
-
-<a asp-action="Ekle" class="btn btn-primary mb-3">Yeni Oturum Ekle</a>
-
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Tanım</th>
-            <th>Başlangıç Saati</th>
-            <th>Bitiş Saati</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
-        {
-            foreach (var oturum in Model)
-            {
-                <tr>
-                    <td>@oturum.Tanim</td>
-                    <td>@oturum.BaslangicSaat</td>
-                    <td>@oturum.BitisSaat</td>
-                </tr>
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="3" class="text-center">
-                    Henüz oturum eklenmemiş.
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-=======
-﻿@model List<OBS_Projesi.Models.Oturum>
+@model List<OBS_Projesi.Models.Oturum>
 
 @{
     ViewData["Title"] = "Oturum Yönetimi";
+
+    var oturumlar = Model ?? new List<OBS_Projesi.Models.Oturum>();
 }
 
-<div class="container-fluid px-4 py-4">
+<style>
+    .page-shell {
+        color: #ffffff;
+    }
+
+    .page-title {
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .page-subtitle {
+        color: #cbd5e1;
+    }
+
+    .stat-card {
+        background: #ffffff;
+        color: #111827;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,.18);
+    }
+
+        .stat-card .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .stat-number {
+            color: #111827;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+    .content-card {
+        background: #ffffff;
+        color: #111827;
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,.18);
+    }
+
+    .content-card-header {
+        background: #ffffff;
+        color: #111827;
+        padding: 22px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .content-card-header h5 {
+            color: #111827;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .content-card-header small {
+            color: #6b7280;
+        }
+
+    .custom-table {
+        background: #ffffff;
+        color: #111827;
+        margin-bottom: 0;
+    }
+
+        .custom-table thead th {
+            background: #f3f4f6;
+            color: #111827;
+            font-weight: 700;
+            border-bottom: 1px solid #d1d5db;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .custom-table tbody td {
+            background: #ffffff;
+            color: #111827;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
+
+        .custom-table tbody tr:hover td {
+            background: #f9fafb;
+        }
+
+    .empty-row {
+        color: #6b7280;
+        padding: 48px 0;
+    }
+</style>
+
+<div class="container-fluid px-4 py-4 page-shell">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Oturum Yönetimi</h2>
-            <p class="text-muted mb-0">
+            <h2 class="page-title mb-1">Oturum Yönetimi</h2>
+            <p class="page-subtitle mb-0">
                 Sınavların atanacağı sabit saat aralıklarını yönetin.
             </p>
         </div>
@@ -80,110 +136,116 @@
 
     <div class="row g-3 mb-4">
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <p class="text-muted mb-1">Toplam Oturum</p>
-                    <h3 class="fw-bold mb-0">@Model.Count</h3>
+                    <p class="stat-label">Toplam Oturum</p>
+                    <h3 class="stat-number">@oturumlar.Count</h3>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <p class="text-muted mb-1">İlk Oturum</p>
-                    <h3 class="fw-bold mb-0">
-                        @(Model.Any() ? Model.Min(x => x.BaslangicSaat).ToString(@"hh\:mm") : "-")
+                    <p class="stat-label">İlk Oturum</p>
+                    <h3 class="stat-number">
+                        @(oturumlar.Any() ? oturumlar.Min(x => x.BaslangicSaat).ToString(@"hh\:mm") : "-")
                     </h3>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <p class="text-muted mb-1">Son Oturum</p>
-                    <h3 class="fw-bold mb-0">
-                        @(Model.Any() ? Model.Max(x => x.BitisSaat).ToString(@"hh\:mm") : "-")
+                    <p class="stat-label">Son Oturum</p>
+                    <h3 class="stat-number">
+                        @(oturumlar.Any() ? oturumlar.Max(x => x.BitisSaat).ToString(@"hh\:mm") : "-")
                     </h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-header bg-white border-0 pt-4 px-4">
-            <h5 class="fw-bold mb-0">Oturum Listesi</h5>
+    <div class="content-card">
+        <div class="content-card-header">
+            <div>
+                <h5>Oturum Listesi</h5>
+                <small>Tanım, saat aralığı ve süre bilgileri</small>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="Oturum" asp-action="Ekle" class="btn btn-sm btn-primary">
+                    + Yeni Oturum
+                </a>
+            }
         </div>
 
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">Oturum Tanımı</th>
-                            <th>Başlangıç Saati</th>
-                            <th>Bitiş Saati</th>
-                            <th>Süre</th>
-                            <th class="text-end pe-4">İşlemler</th>
-                        </tr>
-                    </thead>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle custom-table">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Oturum Tanımı</th>
+                        <th>Başlangıç Saati</th>
+                        <th>Bitiş Saati</th>
+                        <th>Süre</th>
+                        <th class="text-end pe-4">İşlemler</th>
+                    </tr>
+                </thead>
 
-                    <tbody>
-                        @if (Model.Any())
+                <tbody>
+                    @if (oturumlar.Any())
+                    {
+                        foreach (var oturum in oturumlar)
                         {
-                            foreach (var oturum in Model)
-                            {
-                                var sure = oturum.BitisSaat - oturum.BaslangicSaat;
+                            var sure = oturum.BitisSaat - oturum.BaslangicSaat;
 
-                                <tr>
-                                    <td class="ps-4 fw-semibold">@oturum.Tanim</td>
-                                    <td>@oturum.BaslangicSaat.ToString(@"hh\:mm")</td>
-                                    <td>@oturum.BitisSaat.ToString(@"hh\:mm")</td>
-                                    <td>@sure.TotalMinutes dakika</td>
-                                    <td class="text-end pe-4">
-                                        @if (User.IsInRole("Admin"))
-                                        {
-                                            <a asp-controller="Oturum"
-                                               asp-action="Duzenle"
-                                               asp-route-id="@oturum.OturumID"
-                                               class="btn btn-sm btn-outline-primary me-2">
-                                                Düzenle
-                                            </a>
-
-                                            <form asp-controller="Oturum"
-                                                  asp-action="Sil"
-                                                  asp-route-id="@oturum.OturumID"
-                                                  method="post"
-                                                  class="d-inline"
-                                                  onsubmit="return confirm('Bu oturumu silmek istediğinize emin misiniz?');">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                    Sil
-                                                </button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">Sadece görüntüleme</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-5">
-                                    Henüz oturum eklenmemiş.
+                                <td class="ps-4 fw-semibold">@oturum.Tanim</td>
+                                <td>@oturum.BaslangicSaat.ToString(@"hh\:mm")</td>
+                                <td>@oturum.BitisSaat.ToString(@"hh\:mm")</td>
+                                <td>@((int)sure.TotalMinutes) dakika</td>
+                                <td class="text-end pe-4">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-controller="Oturum"
+                                           asp-action="Duzenle"
+                                           asp-route-id="@oturum.OturumID"
+                                           class="btn btn-sm btn-outline-primary me-2">
+                                            Düzenle
+                                        </a>
+
+                                        <form asp-controller="Oturum"
+                                              asp-action="Sil"
+                                              asp-route-id="@oturum.OturumID"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Bu oturumu silmek istediğinize emin misiniz?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                Sil
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Sadece görüntüleme</span>
+                                    }
                                 </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center empty-row">
+                                Henüz oturum eklenmemiş.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
-
 </div>
->>>>>>> 6e0fdc6 (Sınav yönetimi ve temel CRUD ekranları geliştirildi)

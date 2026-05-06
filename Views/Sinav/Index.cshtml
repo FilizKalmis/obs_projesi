@@ -1,23 +1,130 @@
 ﻿@model List<OBS_Projesi.Models.Sinav>
 
 @{
-    ViewData["Title"] = "Sınav Planlama";
+    ViewData["Title"] = "Sınav Programı";
+
+    var sinavlar = Model ?? new List<OBS_Projesi.Models.Sinav>();
 }
 
-<div class="container-fluid px-4 py-4">
+<style>
+    .sinav-page {
+        color: #ffffff;
+    }
+
+        .sinav-page .page-title {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .sinav-page .page-subtitle {
+            color: #cbd5e1;
+        }
+
+    .stat-card {
+        background: #ffffff;
+        color: #111827;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+    }
+
+        .stat-card .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .stat-number {
+            color: #111827;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+    .program-card {
+        background: #ffffff;
+        color: #111827;
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+    }
+
+    .program-card-header {
+        background: #ffffff;
+        color: #111827;
+        padding: 22px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .program-card-header h5 {
+            color: #111827;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .program-card-header small {
+            color: #6b7280;
+        }
+
+    .sinav-table {
+        background: #ffffff;
+        color: #111827;
+        margin-bottom: 0;
+    }
+
+        .sinav-table thead th {
+            background: #f3f4f6;
+            color: #111827;
+            font-weight: 700;
+            border-bottom: 1px solid #d1d5db;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .sinav-table tbody td {
+            background: #ffffff;
+            color: #111827;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
+
+        .sinav-table tbody tr:hover td {
+            background: #f9fafb;
+        }
+
+    .salon-text {
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .empty-row {
+        color: #6b7280;
+        padding: 48px 0;
+    }
+
+    .action-buttons {
+        min-width: 120px;
+    }
+</style>
+
+<div class="container-fluid px-4 py-4 sinav-page">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Sınav Planlama</h2>
-            <p class="text-muted mb-0">
-                Derslerin sınav tarihlerini ve oturumlarını çakışma kurallarına göre yönetin.
+            <h2 class="page-title mb-1">Sınav Programı</h2>
+            <p class="page-subtitle mb-0">
+                Planlanan sınavları, oturumları ve atanan salonları görüntüleyin.
             </p>
         </div>
 
         @if (User.IsInRole("Admin"))
         {
-            <a asp-controller="Sinav" asp-action="Ekle" class="btn btn-primary px-4">
-                + Yeni Sınav
+            <a asp-controller="Sinav" asp-action="Olustur" class="btn btn-primary px-4">
+                + Yeni Sınav Oluştur
             </a>
         }
     </div>
@@ -26,6 +133,13 @@
     {
         <div class="alert alert-success border-0 shadow-sm">
             @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["WarningMessage"] != null)
+    {
+        <div class="alert alert-warning border-0 shadow-sm">
+            @TempData["WarningMessage"]
         </div>
     }
 
@@ -38,136 +152,193 @@
 
     <div class="row g-3 mb-4">
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <p class="text-muted mb-1">Toplam Sınav</p>
-                    <h3 class="fw-bold mb-0">@Model.Count</h3>
+                    <p class="stat-label">Toplam Sınav</p>
+                    <h3 class="stat-number">@sinavlar.Count</h3>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <p class="text-muted mb-1">Bugünden Sonraki Sınav</p>
-                    <h3 class="fw-bold mb-0">@Model.Count(x => x.Tarih.Date >= DateTime.Today)</h3>
+                    <p class="stat-label">Bugünden Sonraki Sınav</p>
+                    <h3 class="stat-number">@sinavlar.Count(x => x.Tarih.Date >= DateTime.Today)</h3>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4">
+            <div class="card stat-card">
                 <div class="card-body">
-                    <p class="text-muted mb-1">Farklı Gün Sayısı</p>
-                    <h3 class="fw-bold mb-0">@Model.Select(x => x.Tarih.Date).Distinct().Count()</h3>
+                    <p class="stat-label">Farklı Gün Sayısı</p>
+                    <h3 class="stat-number">@sinavlar.Select(x => x.Tarih.Date).Distinct().Count()</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-header bg-white border-0 pt-4 px-4">
-            <h5 class="fw-bold mb-0">Sınav Programı</h5>
+    <div class="program-card">
+        <div class="program-card-header">
+            <div>
+                <h5>Planlanan Sınavlar</h5>
+                <small>Ders, tarih, oturum ve salon bilgileri</small>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="Sinav" asp-action="Olustur" class="btn btn-sm btn-primary">
+                    + Yeni Sınav
+                </a>
+            }
         </div>
 
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">Tarih</th>
-                            <th>Oturum</th>
-                            <th>Saat</th>
-                            <th>Ders Kodu</th>
-                            <th>Ders Adı</th>
-                            <th>Bölüm</th>
-                            <th>Yarıyıl</th>
-                            <th>Öğrenci</th>
-                            <th class="text-end pe-4">İşlemler</th>
-                        </tr>
-                    </thead>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle sinav-table">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Tarih</th>
+                        <th>Oturum</th>
+                        <th>Saat</th>
+                        <th>Ders Kodu</th>
+                        <th>Ders Adı</th>
+                        <th>Bölüm</th>
+                        <th>Yarıyıl</th>
+                        <th>Öğrenci</th>
+                        <th>Salonlar</th>
+                        <th>Toplam Kapasite</th>
+                        <th class="text-end pe-4">İşlemler</th>
+                    </tr>
+                </thead>
 
-                    <tbody>
-                        @if (Model.Any())
+                <tbody>
+                    @if (sinavlar.Any())
+                    {
+                        foreach (var sinav in sinavlar)
                         {
-                            foreach (var sinav in Model)
-                            {
-                                <tr>
-                                    <td class="ps-4 fw-semibold">
-                                        @sinav.Tarih.ToString("dd.MM.yyyy")
-                                    </td>
+                            var salonlar = sinav.SinavSalonlari != null && sinav.SinavSalonlari.Any()
+                            ? string.Join(", ", sinav.SinavSalonlari.Select(ss => $"{ss.Derslik.Ad} ({ss.Derslik.Kapasite})"))
+                            : "-";
 
-                                    <td>
-                                        @sinav.Oturum?.Tanim
-                                    </td>
+                            var toplamKapasite = sinav.SinavSalonlari != null && sinav.SinavSalonlari.Any()
+                            ? sinav.SinavSalonlari.Sum(ss => ss.Derslik.Kapasite)
+                            : 0;
 
-                                    <td>
-                                        @sinav.Oturum?.BaslangicSaat.ToString(@"hh\:mm")
-                                        -
-                                        @sinav.Oturum?.BitisSaat.ToString(@"hh\:mm")
-                                    </td>
+                            var ogrenciSayisi = sinav.Ders?.OgrenciSayisi ?? 0;
 
-                                    <td>
-                                        @sinav.Ders?.DersKodu
-                                    </td>
-
-                                    <td>
-                                        @sinav.Ders?.DersAdi
-                                    </td>
-
-                                    <td>
-                                        @sinav.Ders?.Bolum?.BolumAdi
-                                    </td>
-
-                                    <td>
-                                        @sinav.Ders?.Yariyil
-                                    </td>
-
-                                    <td>
-                                        @sinav.Ders?.OgrenciSayisi
-                                    </td>
-
-                                    <td class="text-end pe-4">
-                                        @if (User.IsInRole("Admin"))
-                                        {
-                                            <a asp-controller="Sinav"
-                                               asp-action="Duzenle"
-                                               asp-route-id="@sinav.SinavID"
-                                               class="btn btn-sm btn-outline-primary me-2">
-                                                Düzenle
-                                            </a>
-
-                                            <form asp-controller="Sinav"
-                                                  asp-action="Sil"
-                                                  asp-route-id="@sinav.SinavID"
-                                                  method="post"
-                                                  class="d-inline"
-                                                  onsubmit="return confirm('Bu sınavı silmek istediğinize emin misiniz?');">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                    Sil
-                                                </button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">Sadece görüntüleme</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-5">
-                                    Henüz sınav planlanmamış.
+                                <td class="ps-4 fw-semibold">
+                                    @sinav.Tarih.ToString("dd.MM.yyyy")
+                                </td>
+
+                                <td>
+                                    @sinav.Oturum?.Tanim
+                                </td>
+
+                                <td>
+                                    @sinav.Oturum?.BaslangicSaat.ToString(@"hh\:mm")
+                                    -
+                                    @sinav.Oturum?.BitisSaat.ToString(@"hh\:mm")
+                                </td>
+
+                                <td>
+                                    @sinav.Ders?.DersKodu
+                                </td>
+
+                                <td>
+                                    @sinav.Ders?.DersAdi
+                                </td>
+
+                                <td>
+                                    @sinav.Ders?.Bolum?.BolumAdi
+                                </td>
+
+                                <td>
+                                    @sinav.Ders?.Yariyil
+                                </td>
+
+                                <td>
+                                    @ogrenciSayisi
+                                </td>
+
+                                <td class="salon-text">
+                                    @salonlar
+                                </td>
+
+                                <td>
+                                    @if (toplamKapasite >= ogrenciSayisi && toplamKapasite > 0)
+                                    {
+                                        <span class="badge bg-success">
+                                            @toplamKapasite
+                                        </span>
+                                    }
+                                    else if (toplamKapasite == 0)
+                                    {
+                                        <span class="badge bg-secondary">
+                                            Atanmadı
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            @toplamKapasite
+                                        </span>
+                                    }
+                                </td>
+
+                                <td class="text-end pe-4 action-buttons">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-controller="Sinav"
+                                           asp-action="Duzenle"
+                                           asp-route-id="@sinav.SinavID"
+                                           class="btn btn-sm btn-outline-primary me-2">
+                                            Düzenle
+                                        </a>
+
+                                        <form asp-controller="Sinav"
+                                              asp-action="Sil"
+                                              asp-route-id="@sinav.SinavID"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Bu sınavı silmek istediğinize emin misiniz?');">
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                Sil
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">
+                                            Sadece görüntüleme
+                                        </span>
+                                    }
                                 </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center empty-row">
+                                <div class="mb-3">
+                                    Henüz sınav planlanmamış.
+                                </div>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-controller="Sinav" asp-action="Olustur" class="btn btn-primary">
+                                        İlk Sınavı Oluştur
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 

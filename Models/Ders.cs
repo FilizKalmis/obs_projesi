@@ -16,15 +16,15 @@ namespace OBS_Projesi.Models
         [Display(Name = "Ders Kodu")]
         public string DersKodu { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Ders türü zorunludur.")]
-        [StringLength(30)]
-        [Display(Name = "Ders Türü")]
-        public string DersTuru { get; set; } = string.Empty;
-
         [Required(ErrorMessage = "Ders adı zorunludur.")]
         [StringLength(100)]
         [Display(Name = "Ders Adı")]
         public string DersAdi { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Ders türü zorunludur.")]
+        [StringLength(30)]
+        [Display(Name = "Ders Türü")]
+        public string DersTuru { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Öğrenci sayısı zorunludur.")]
         [Range(1, 500, ErrorMessage = "Öğrenci sayısı 1-500 arasında olmalıdır.")]
@@ -41,6 +41,7 @@ namespace OBS_Projesi.Models
         public int BolumID { get; set; }
 
         [ValidateNever]
+        [ForeignKey("BolumID")]
         public Bolum Bolum { get; set; } = null!;
 
         [ValidateNever]

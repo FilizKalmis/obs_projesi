@@ -4,51 +4,134 @@
     ViewData["Title"] = "Sınav Programı";
 }
 
-<h2>Sınav Programı</h2>
+<div class="container-fluid px-4 py-4">
 
-<a asp-action="Olustur" class="btn btn-primary mb-3">
-    Yeni Sınav / Salon Ata
-</a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Sınav Programı</h2>
+            <p class="text-muted mb-0">
+                Oluşturulan sınavları, oturumları ve salon atamalarını görüntüleyin.
+            </p>
+        </div>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Ders</th>
-            <th>Tarih</th>
-            <th>Oturum</th>
-            <th>Salonlar</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @if (Model != null && Model.Any())
+        @if (User.IsInRole("Admin"))
         {
-            foreach (var sinav in Model)
-            {
-                <tr>
-                    <td>@sinav.Ders?.DersAdi</td>
-                    <td>@sinav.Tarih.ToShortDateString()</td>
-                    <td>@sinav.Oturum?.Tanim</td>
-                    <td>
-                        @if (sinav.SinavSalonlari != null && sinav.SinavSalonlari.Any())
-                        {
-                            @string.Join(", ", sinav.SinavSalonlari.Select(ss => ss.Derslik?.Ad))
-                        }
-                        else
-                        {
-                            <span>Salon atanmamış</span>
-                        }
-                    </td>
-                </tr>
-            }
+            <a asp-controller="Sinav" asp-action="Olustur" class="btn btn-primary">
+                Yeni Sınav / Salon Ata
+            </a>
         }
-        else
-        {
-            <tr>
-                <td colspan="4" class="text-center">
-                    Henüz sınav oluşturulmamış.
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    </div>
+
+    @if (TempData["Basari"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Basari"]
+        </div>
+    }
+
+    @if (TempData["Hata"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Hata"]
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header border-0 py-3">
+            <h5 class="mb-0">Sınav Listesi</h5>
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-bordered mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Ders</th>
+                        <th>Tarih</th>
+                        <th>Oturum</th>
+                        <th>Salonlar</th>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th style="width: 220px;">İşlemler</th>
+                        }
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @(item.Ders != null ? item.Ders.DersAdi : "Ders bilgisi yok")
+                                </td>
+
+                                <td>
+                                    @item.Tarih.ToString("dd.MM.yyyy")
+                                </td>
+
+                                <td>
+                                    @(item.Oturum != null ? item.Oturum.Tanim : "Oturum bilgisi yok")
+                                </td>
+
+                                <td>
+                                    @if (item.SinavSalonlari != null && item.SinavSalonlari.Any())
+                                    {
+                            <span>
+                                @string.Join(", ", item.SinavSalonlari
+                                                                .Where(ss => ss.Derslik != null)
+                                                                .Select(ss => ss.Derslik.Ad))
+                            </span>
+                                                        }
+                                    else
+                                    {
+                                        <span class="text-warning">Salon atanmamış</span>
+                                    }
+                                </td>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <td>
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <a asp-controller="Sinav"
+                                               asp-action="Duzenle"
+                                               asp-route-id="@item.SinavID"
+                                               class="btn btn-sm btn-outline-primary">
+                                                Düzenle
+                                            </a>
+
+                                            @if (item.SinavSalonlari == null || !item.SinavSalonlari.Any())
+                                            {
+                                                <form asp-controller="Sinav"
+                                                      asp-action="SalonAta"
+                                                      asp-route-id="@item.SinavID"
+                                                      method="post"
+                                                      style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                                        Salon Ata
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                Henüz sınav kaydı bulunmamaktadır.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

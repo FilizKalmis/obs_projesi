@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OBS_Projesi.Data;
 
@@ -11,9 +12,11 @@ using OBS_Projesi.Data;
 namespace OBS_Projesi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260506153018_MergeSonrasiGuncelleme")]
+    partial class MergeSonrasiGuncelleme
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,7 +150,7 @@ namespace OBS_Projesi.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("PersonelID")
+                    b.Property<int>("PersonelID")
                         .HasColumnType("int");
 
                     b.Property<string>("Rol")
@@ -386,7 +389,9 @@ namespace OBS_Projesi.Migrations
                 {
                     b.HasOne("OBS_Projesi.Models.Personel", "Personel")
                         .WithMany()
-                        .HasForeignKey("PersonelID");
+                        .HasForeignKey("PersonelID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Personel");
                 });

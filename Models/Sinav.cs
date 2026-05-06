@@ -12,19 +12,6 @@ namespace OBS_Projesi.Models
         [Key]
         public int SinavID { get; set; }
 
-<<<<<<< HEAD
-        public int DersID { get; set; }
-
-        public DateTime Tarih { get; set; }
-
-        public int OturumID { get; set; }
-
-        public Ders? Ders { get; set; }
-
-        public Oturum? Oturum { get; set; }
-
-        public ICollection<SinavSalonu>? SinavSalonlari { get; set; }
-=======
         [Required(ErrorMessage = "Ders seçimi zorunludur.")]
         [Display(Name = "Ders")]
         public int DersID { get; set; }
@@ -46,6 +33,5 @@ namespace OBS_Projesi.Models
 
         [ValidateNever]
         public ICollection<SinavSalonu> SinavSalonlari { get; set; } = new List<SinavSalonu>();
->>>>>>> 6e0fdc6 (Sınav yönetimi ve temel CRUD ekranları geliştirildi)
     }
 }

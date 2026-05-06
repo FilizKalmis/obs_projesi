@@ -4,40 +4,6 @@
     ViewData["Title"] = "Yeni Oturum Ekle";
 }
 
-<<<<<<< HEAD
-<h2>Yeni Oturum Ekle</h2>
-
-<div class="row">
-    <div class="col-md-6 shadow-sm p-4 bg-white rounded">
-        <form asp-action="Ekle" method="post">
-            @Html.AntiForgeryToken()
-
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-            <div class="mb-3">
-                <label asp-for="Tanim" class="form-label">Oturum Tanımı</label>
-                <input asp-for="Tanim" class="form-control" placeholder="Örn: Sabah-1" />
-                <span asp-validation-for="Tanim" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="BaslangicSaat" class="form-label">Başlangıç Saati</label>
-                <input asp-for="BaslangicSaat" type="time" class="form-control" />
-                <span asp-validation-for="BaslangicSaat" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="BitisSaat" class="form-label">Bitiş Saati</label>
-                <input asp-for="BitisSaat" type="time" class="form-control" />
-                <span asp-validation-for="BitisSaat" class="text-danger"></span>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Kaydet</button>
-            <a asp-action="Index" class="btn btn-secondary">İptal</a>
-        </form>
-    </div>
-</div>
-=======
 <div class="container-fluid px-4 py-4">
 
     <div class="mb-4">
@@ -105,4 +71,3 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
->>>>>>> 6e0fdc6 (Sınav yönetimi ve temel CRUD ekranları geliştirildi)

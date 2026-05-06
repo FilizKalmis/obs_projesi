@@ -4,55 +4,6 @@
     ViewData["Title"] = "Yeni Ders Ekle";
 }
 
-<<<<<<< HEAD
-<h2>Yeni Ders Ekle</h2>
-
-<div class="row">
-    <div class="col-md-6 shadow-sm p-4 bg-white rounded">
-        <form asp-action="Ekle" method="post">
-            @Html.AntiForgeryToken()
-
-            <div class="mb-3">
-                <label asp-for="DersKodu" class="form-label">Ders Kodu</label>
-                <input asp-for="DersKodu" class="form-control" placeholder="Örn: YZM 2126" />
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="DersAdi" class="form-label">Ders Adı</label>
-                <input asp-for="DersAdi" class="form-control" placeholder="Örn: Veritabanı Sistemlerine Giriş" />
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="DersTuru" class="form-label">Ders Türü</label>
-                <select asp-for="DersTuru" class="form-select">
-                    <option value="Zorunlu">Zorunlu</option>
-                    <option value="Seçmeli">Seçmeli</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="OgrenciSayisi" class="form-label">Öğrenci Sayısı</label>
-                <input asp-for="OgrenciSayisi" type="number" class="form-control" />
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Yariyil" class="form-label">Yarıyıl</label>
-                <input asp-for="Yariyil" type="number" class="form-control" min="1" max="8" />
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="BolumID" class="form-label">Bölüm</label>
-                <select asp-for="BolumID" class="form-select" asp-items="ViewBag.Bolumler">
-                    <option value="">Bölüm seçiniz</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Kaydet</button>
-            <a asp-action="Index" class="btn btn-secondary">İptal</a>
-        </form>
-    </div>
-</div>
-=======
 <div class="container-fluid px-4 py-4">
 
     <div class="mb-4">
@@ -145,4 +96,3 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
->>>>>>> 6e0fdc6 (Sınav yönetimi ve temel CRUD ekranları geliştirildi)

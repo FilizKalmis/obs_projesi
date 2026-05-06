@@ -1,31 +1,38 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using OBS_Projesi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MSSQL Baðlantýsýný Servislere Ekle
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Connection string kontrolü
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// 1. Authentication Servisini Ekle
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("DefaultConnection connection string bulunamadý. appsettings.json dosyasýný kontrol et.");
+}
+
+// MSSQL baðlantýsýný servislere ekle
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// MVC servisleri
+builder.Services.AddControllersWithViews();
+
+// Cookie Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login"; // Giriþ sayfasý yolu
-        options.AccessDeniedPath = "/Account/AccessDenied"; // Yetkisiz eriþim yolu
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
     });
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -34,8 +41,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Kim kimdir?
-app.UseAuthorization(); // Kim neyi yapabilir?
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity; // PasswordHasher için
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OBS_Projesi.Data;
 using OBS_Projesi.Models;
@@ -19,32 +19,49 @@ namespace OBS_Projesi.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login()
+        {
+            return View();
+        }
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            // 1. Kullanıcıyı sadece kullanıcı adıyla bul
-            var user = _context.Kullanicilar.FirstOrDefault(u => u.KullaniciAdi == model.KullaniciAdi);
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = _context.Kullanicilar
+                .FirstOrDefault(u => u.KullaniciAdi == model.KullaniciAdi);
 
             if (user != null)
             {
-                // 2. Hashlenmiş şifreyi doğrula (Siber Güvenlik Katmanı)
                 var hasher = new PasswordHasher<Kullanici>();
                 var result = hasher.VerifyHashedPassword(user, user.Sifre, model.Sifre);
 
                 if (result == PasswordVerificationResult.Success)
                 {
-                    // Şifre doğruysa Claim'leri oluştur ve giriş yap
                     var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.KullaniciAdi),
-                new Claim(ClaimTypes.Role, user.Rol),
-                new Claim("PersonelID", user.PersonelID.ToString())
-            };
+                    {
+                        new Claim(ClaimTypes.Name, user.KullaniciAdi),
+                        new Claim(ClaimTypes.Role, user.Rol)
+                    };
 
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+                    if (user.PersonelID.HasValue)
+                    {
+                        claims.Add(new Claim("PersonelID", user.PersonelID.Value.ToString()));
+                    }
+
+                    var claimsIdentity = new ClaimsIdentity(
+                        claims,
+                        CookieAuthenticationDefaults.AuthenticationScheme
+                    );
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity)
+                    );
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -57,43 +74,37 @@ namespace OBS_Projesi.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            ViewBag.Personeller = _context.Personeller.ToList(); // Dropdown dolması için şart
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // 1. Kullanıcı adı daha önce alınmış mı?
-                if (_context.Kullanicilar.Any(u => u.KullaniciAdi == model.KullaniciAdi))
-                {
-                    ModelState.AddModelError("KullaniciAdi", "Bu kullanıcı adı zaten alınmış.");
-                    return View(model);
-                }
-
-                // 2. Şifreyi Hash'leme 
-                var hasher = new PasswordHasher<Kullanici>();
-                string hashedPass = hasher.HashPassword(null, model.Sifre);
-
-                // 3. Yeni Kullanıcı Nesnesi
-                var yeniKullanici = new Kullanici
-                {
-                    KullaniciAdi = model.KullaniciAdi,
-                    Sifre = hashedPass,
-                    Rol = "Viewer", // Yeni kayıt olanlar varsayılan olarak kısıtlı yetkiyle başlar
-                    PersonelID = model.PersonelID
-                };
-
-                _context.Kullanicilar.Add(yeniKullanici);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("Login");
+                return View(model);
             }
-            ViewBag.Personeller = _context.Personeller.ToList();
-            return View(model);
 
+            if (_context.Kullanicilar.Any(u => u.KullaniciAdi == model.KullaniciAdi))
+            {
+                ModelState.AddModelError("KullaniciAdi", "Bu kullanıcı adı zaten alınmış.");
+                return View(model);
+            }
+
+            var yeniKullanici = new Kullanici
+            {
+                KullaniciAdi = model.KullaniciAdi,
+                Rol = "Viewer",
+                PersonelID = null
+            };
+
+            var hasher = new PasswordHasher<Kullanici>();
+            yeniKullanici.Sifre = hasher.HashPassword(yeniKullanici, model.Sifre);
+
+            _context.Kullanicilar.Add(yeniKullanici);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Login");
         }
 
         public async Task<IActionResult> Logout()

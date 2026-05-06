@@ -36,10 +36,65 @@ namespace OBS_Projesi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Ekle([Bind("Tanim,BaslangicSaat,BitisSaat")] Oturum oturum)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(oturum);
+            }
+
             _context.Oturumlar.Add(oturum);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Duzenle(int id)
+        {
+            var oturum = await _context.Oturumlar.FindAsync(id);
+
+            if (oturum == null)
+            {
+                return NotFound();
+            }
+
+            return View(oturum);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Duzenle(int id, [Bind("OturumID,Tanim,BaslangicSaat,BitisSaat")] Oturum oturum)
+        {
+            if (id != oturum.OturumID)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(oturum);
+            }
+
+            try
+            {
+                _context.Update(oturum);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                bool oturumVarMi = await _context.Oturumlar
+                    .AnyAsync(o => o.OturumID == oturum.OturumID);
+
+                if (!oturumVarMi)
+                {
+                    return NotFound();
+                }
+
+                throw;
+            }
         }
     }
 }

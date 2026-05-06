@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OBS_Projesi.Data;
 using OBS_Projesi.Models;
+using OBS_Projesi.Models.ViewModels;
 
 namespace OBS_Projesi.Controllers
 {
-    [Authorize]
     public class SinavController : Controller
     {
         private readonly AppDbContext _context;
@@ -17,110 +16,349 @@ namespace OBS_Projesi.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Program()
+        // Sınav Planlama menüsüne tıklanınca burası açılır.
+        // Direkt sınav oluşturma ekranı değil, sınav programı listesi gelir.
+        public async Task<IActionResult> Index()
         {
             var sinavlar = await _context.Sinavlar
                 .Include(s => s.Ders)
+                    .ThenInclude(d => d.Bolum)
                 .Include(s => s.Oturum)
                 .Include(s => s.SinavSalonlari)
                     .ThenInclude(ss => ss.Derslik)
                 .OrderBy(s => s.Tarih)
+                .ThenBy(s => s.Oturum.BaslangicSaat)
                 .ToListAsync();
 
             return View(sinavlar);
         }
 
-        [Authorize(Roles = "Admin")]
-        public IActionResult Olustur()
+        // Eski Program action'ı kullanılmışsa bozulmasın diye Index'e yönlendiriyoruz.
+        public IActionResult Program()
         {
-            ViewBag.Dersler = new SelectList(_context.Dersler, "DersID", "DersAdi");
-            ViewBag.Oturumlar = new SelectList(_context.Oturumlar, "OturumID", "Tanim");
-
-            return View();
+            return RedirectToAction(nameof(Index));
         }
 
+        // Yeni sınav oluşturma ekranı
+        [HttpGet]
+        public async Task<IActionResult> Olustur()
+        {
+            await FormListeleriniYukle();
+
+            var model = new SinavOlusturViewModel
+            {
+                Tarih = DateTime.Today
+            };
+
+            return View(model);
+        }
+
+        // Yeni sınav oluşturma + otomatik salon atama
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Olustur([Bind("DersID,Tarih,OturumID")] Sinav sinav)
+        public async Task<IActionResult> Olustur(SinavOlusturViewModel model)
         {
-            var ders = await _context.Dersler.FirstOrDefaultAsync(d => d.DersID == sinav.DersID);
+            await FormListeleriniYukle();
+
+            if (model.DersID <= 0)
+            {
+                ModelState.AddModelError("DersID", "Ders seçimi zorunludur.");
+            }
+
+            if (model.OturumID <= 0)
+            {
+                ModelState.AddModelError("OturumID", "Oturum seçimi zorunludur.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var ders = await _context.Dersler
+                .Include(d => d.Bolum)
+                .FirstOrDefaultAsync(d => d.DersID == model.DersID);
 
             if (ders == null)
             {
-                ModelState.AddModelError("", "Ders bulunamadı.");
-                ViewBag.Dersler = new SelectList(_context.Dersler, "DersID", "DersAdi", sinav.DersID);
-                ViewBag.Oturumlar = new SelectList(_context.Oturumlar, "OturumID", "Tanim", sinav.OturumID);
-                return View(sinav);
+                ModelState.AddModelError("", "Seçilen ders bulunamadı.");
+                return View(model);
             }
 
-            bool cakismaVar = await _context.Sinavlar
+            var oturum = await _context.Oturumlar
+                .FirstOrDefaultAsync(o => o.OturumID == model.OturumID);
+
+            if (oturum == null)
+            {
+                ModelState.AddModelError("", "Seçilen oturum bulunamadı.");
+                return View(model);
+            }
+
+            var gunBaslangic = model.Tarih.Date;
+            var gunBitis = gunBaslangic.AddDays(1);
+
+            // Aynı ders aynı gün ve aynı oturumda tekrar oluşturulmasın.
+            var ayniDersAyniOturumVarMi = await _context.Sinavlar
+                .AnyAsync(s =>
+                    s.DersID == model.DersID &&
+                    s.Tarih >= gunBaslangic &&
+                    s.Tarih < gunBitis &&
+                    s.OturumID == model.OturumID
+                );
+
+            if (ayniDersAyniOturumVarMi)
+            {
+                ModelState.AddModelError("", "Bu ders için aynı gün ve aynı oturumda zaten sınav oluşturulmuş.");
+                return View(model);
+            }
+
+            // Aynı yarıyıldaki dersler aynı gün aynı oturuma konulmasın.
+            var yariyilCakismaVarMi = await _context.Sinavlar
                 .Include(s => s.Ders)
                 .AnyAsync(s =>
-                    s.Tarih == sinav.Tarih &&
-                    s.OturumID == sinav.OturumID &&
-                    s.Ders != null &&
-                    s.Ders.Yariyil == ders.Yariyil &&
-                    s.Ders.DersTuru == "Zorunlu" &&
-                    ders.DersTuru == "Zorunlu");
+                    s.Tarih >= gunBaslangic &&
+                    s.Tarih < gunBitis &&
+                    s.OturumID == model.OturumID &&
+                    s.Ders.Yariyil == ders.Yariyil
+                );
 
-            if (cakismaVar)
+            if (yariyilCakismaVarMi)
             {
-                ModelState.AddModelError("", "Aynı yarıyıldaki zorunlu ders aynı oturuma atanamaz.");
-                ViewBag.Dersler = new SelectList(_context.Dersler, "DersID", "DersAdi", sinav.DersID);
-                ViewBag.Oturumlar = new SelectList(_context.Oturumlar, "OturumID", "Tanim", sinav.OturumID);
-                return View(sinav);
+                ModelState.AddModelError("", "Bu yarıyıla ait başka bir ders aynı gün ve aynı oturumda zaten planlanmış.");
+                return View(model);
             }
 
-            var kullanilanSalonlar = await _context.SinavSalonlari
-                .Include(x => x.Sinav)
-                .Where(x =>
-                    x.Sinav != null &&
-                    x.Sinav.Tarih == sinav.Tarih &&
-                    x.Sinav.OturumID == sinav.OturumID)
-                .Select(x => x.DerslikID)
-                .ToListAsync();
+            // Aynı yarıyıl için bir güne 2'den fazla sınav uyarısı
+            var gunlukYariyilSinavSayisi = await _context.Sinavlar
+                .Include(s => s.Ders)
+                .CountAsync(s =>
+                    s.Tarih >= gunBaslangic &&
+                    s.Tarih < gunBitis &&
+                    s.Ders.Yariyil == ders.Yariyil
+                );
 
-            var uygunDerslikler = await _context.Derslikler
-                .Where(d => d.Aktif && !kullanilanSalonlar.Contains(d.DerslikID))
-                .OrderByDescending(d => d.Kapasite)
-                .ToListAsync();
-
-            int kalan = ders.OgrenciSayisi;
-            List<Derslik> secilenDerslikler = new();
-
-            foreach (var derslik in uygunDerslikler)
+            if (gunlukYariyilSinavSayisi >= 2)
             {
-                if (kalan <= 0)
-                    break;
-
-                secilenDerslikler.Add(derslik);
-                kalan -= derslik.Kapasite;
+                TempData["WarningMessage"] = $"{ders.Yariyil}. yarıyıl için bu güne 2'den fazla sınav planlanıyor. Kontrol etmeniz önerilir.";
             }
 
-            if (kalan > 0)
-            {
-                ModelState.AddModelError("", "Yeterli kapasitede boş derslik bulunamadı.");
-                ViewBag.Dersler = new SelectList(_context.Dersler, "DersID", "DersAdi", sinav.DersID);
-                ViewBag.Oturumlar = new SelectList(_context.Oturumlar, "OturumID", "Tanim", sinav.OturumID);
-                return View(sinav);
-            }
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
-            _context.Sinavlar.Add(sinav);
-            await _context.SaveChangesAsync();
-
-            foreach (var derslik in secilenDerslikler)
+            try
             {
-                _context.SinavSalonlari.Add(new SinavSalonu
+                var sinav = new Sinav
                 {
-                    SinavID = sinav.SinavID,
-                    DerslikID = derslik.DerslikID
-                });
+                    DersID = model.DersID,
+                    Tarih = model.Tarih.Date,
+                    OturumID = model.OturumID
+                };
+
+                _context.Sinavlar.Add(sinav);
+                await _context.SaveChangesAsync();
+
+                // Aynı tarih ve oturumda kullanılan derslikleri bul.
+                var kullanilanDerslikIDleri = await _context.SinavSalonlari
+                    .Include(ss => ss.Sinav)
+                    .Where(ss =>
+                        ss.Sinav.Tarih >= gunBaslangic &&
+                        ss.Sinav.Tarih < gunBitis &&
+                        ss.Sinav.OturumID == model.OturumID
+                    )
+                    .Select(ss => ss.DerslikID)
+                    .ToListAsync();
+
+                // Boş ve aktif derslikleri kapasiteye göre büyükten küçüğe sırala.
+                var bosDerslikler = await _context.Derslikler
+                    .Where(d =>
+                        d.Aktif &&
+                        !kullanilanDerslikIDleri.Contains(d.DerslikID)
+                    )
+                    .OrderByDescending(d => d.Kapasite)
+                    .ToListAsync();
+
+                var kalanOgrenciSayisi = ders.OgrenciSayisi;
+                var atananSalonlar = new List<string>();
+
+                foreach (var derslik in bosDerslikler)
+                {
+                    if (kalanOgrenciSayisi <= 0)
+                    {
+                        break;
+                    }
+
+                    var sinavSalonu = new SinavSalonu
+                    {
+                        SinavID = sinav.SinavID,
+                        DerslikID = derslik.DerslikID
+                    };
+
+                    _context.SinavSalonlari.Add(sinavSalonu);
+
+                    kalanOgrenciSayisi -= derslik.Kapasite;
+                    atananSalonlar.Add($"{derslik.Ad} ({derslik.Kapasite})");
+                }
+
+                if (kalanOgrenciSayisi > 0)
+                {
+                    throw new Exception("Yeterli boş derslik bulunamadı. Sınav oluşturulmadı.");
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = $"Sınav oluşturuldu. Atanan salonlar: {string.Join(", ", atananSalonlar)}";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+
+                ModelState.AddModelError("", $"Sınav oluşturulurken hata oluştu: {ex.Message}");
+                return View(model);
+            }
+        }
+
+        // Düzenleme ekranı
+        [HttpGet]
+        public async Task<IActionResult> Duzenle(int id)
+        {
+            var sinav = await _context.Sinavlar
+                .Include(s => s.Ders)
+                .Include(s => s.Oturum)
+                .FirstOrDefaultAsync(s => s.SinavID == id);
+
+            if (sinav == null)
+            {
+                return NotFound();
             }
 
-            await _context.SaveChangesAsync();
+            await FormListeleriniYukle();
 
-            return RedirectToAction(nameof(Program));
+            return View(sinav);
+        }
+
+        // Sınav düzenleme
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Duzenle(int id, Sinav sinav)
+        {
+            if (id != sinav.SinavID)
+            {
+                return NotFound();
+            }
+
+            await FormListeleriniYukle();
+
+            if (!ModelState.IsValid)
+            {
+                return View(sinav);
+            }
+
+            var mevcutSinav = await _context.Sinavlar
+                .FirstOrDefaultAsync(s => s.SinavID == id);
+
+            if (mevcutSinav == null)
+            {
+                return NotFound();
+            }
+
+            var eskiTarih = mevcutSinav.Tarih;
+            var eskiOturumID = mevcutSinav.OturumID;
+
+            mevcutSinav.DersID = sinav.DersID;
+            mevcutSinav.Tarih = sinav.Tarih.Date;
+            mevcutSinav.OturumID = sinav.OturumID;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Sınav bilgileri başarıyla güncellendi.";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex)
+            {
+                ModelState.AddModelError("", $"Sınav güncellenirken hata oluştu: {ex.Message}");
+                return View(sinav);
+            }
+        }
+
+        // Sınav silme
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Sil(int id)
+        {
+            var sinav = await _context.Sinavlar
+                .Include(s => s.SinavSalonlari)
+                .FirstOrDefaultAsync(s => s.SinavID == id);
+
+            if (sinav == null)
+            {
+                TempData["ErrorMessage"] = "Silinecek sınav bulunamadı.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                if (sinav.SinavSalonlari != null && sinav.SinavSalonlari.Any())
+                {
+                    _context.SinavSalonlari.RemoveRange(sinav.SinavSalonlari);
+                }
+
+                _context.Sinavlar.Remove(sinav);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = "Sınav başarıyla silindi.";
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+
+                TempData["ErrorMessage"] = $"Sınav silinirken hata oluştu: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Eski Ekle action'ı kullanılmışsa bozulmasın diye Olustur'a yönlendiriyoruz.
+        [HttpGet]
+        public IActionResult Ekle()
+        {
+            return RedirectToAction(nameof(Olustur));
+        }
+
+        private async Task FormListeleriniYukle()
+        {
+            var dersler = await _context.Dersler
+                .Include(d => d.Bolum)
+                .OrderBy(d => d.DersKodu)
+                .ToListAsync();
+
+            ViewBag.Dersler = dersler
+                .Select(d => new SelectListItem
+                {
+                    Value = d.DersID.ToString(),
+                    Text = $"{d.DersKodu} - {d.DersAdi} ({d.OgrenciSayisi} kişi / {d.Yariyil}. yarıyıl)"
+                })
+                .ToList();
+
+            var oturumlar = await _context.Oturumlar
+                .OrderBy(o => o.BaslangicSaat)
+                .ToListAsync();
+
+            ViewBag.Oturumlar = oturumlar
+                .Select(o => new SelectListItem
+                {
+                    Value = o.OturumID.ToString(),
+                    Text = $"{o.Tanim} ({o.BaslangicSaat:hh\\:mm} - {o.BitisSaat:hh\\:mm})"
+                })
+                .ToList();
         }
     }
 }
