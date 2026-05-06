@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OBS_Projesi.Data;
@@ -7,6 +8,7 @@ using OBS_Projesi.Models.ViewModels;
 
 namespace OBS_Projesi.Controllers
 {
+    [Authorize]
     public class SinavController : Controller
     {
         private readonly AppDbContext _context;
@@ -41,6 +43,7 @@ namespace OBS_Projesi.Controllers
 
         // Yeni sınav oluşturma ekranı
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Olustur()
         {
             await FormListeleriniYukle();
@@ -56,6 +59,7 @@ namespace OBS_Projesi.Controllers
         // Yeni sınav oluşturma + otomatik salon atama
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Olustur(SinavOlusturViewModel model)
         {
             await FormListeleriniYukle();
@@ -221,6 +225,7 @@ namespace OBS_Projesi.Controllers
 
         // Düzenleme ekranı
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Duzenle(int id)
         {
             var sinav = await _context.Sinavlar
@@ -241,12 +246,17 @@ namespace OBS_Projesi.Controllers
         // Sınav düzenleme
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Duzenle(int id, Sinav sinav)
         {
             if (id != sinav.SinavID)
             {
                 return NotFound();
             }
+
+            ModelState.Remove("Ders");
+            ModelState.Remove("Oturum");
+            ModelState.Remove("SinavSalonlari");
 
             await FormListeleriniYukle();
 
@@ -262,9 +272,6 @@ namespace OBS_Projesi.Controllers
             {
                 return NotFound();
             }
-
-            var eskiTarih = mevcutSinav.Tarih;
-            var eskiOturumID = mevcutSinav.OturumID;
 
             mevcutSinav.DersID = sinav.DersID;
             mevcutSinav.Tarih = sinav.Tarih.Date;
@@ -288,33 +295,57 @@ namespace OBS_Projesi.Controllers
         // Sınav silme
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Sil(int id)
         {
-            var sinav = await _context.Sinavlar
-                .Include(s => s.SinavSalonlari)
-                .FirstOrDefaultAsync(s => s.SinavID == id);
-
-            if (sinav == null)
-            {
-                TempData["ErrorMessage"] = "Silinecek sınav bulunamadı.";
-                return RedirectToAction(nameof(Index));
-            }
-
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                if (sinav.SinavSalonlari != null && sinav.SinavSalonlari.Any())
+                var sinav = await _context.Sinavlar
+                    .FirstOrDefaultAsync(s => s.SinavID == id);
+
+                if (sinav == null)
                 {
-                    _context.SinavSalonlari.RemoveRange(sinav.SinavSalonlari);
+                    TempData["ErrorMessage"] = "Silinecek sınav bulunamadı.";
+                    return RedirectToAction(nameof(Index));
                 }
 
-                _context.Sinavlar.Remove(sinav);
+                // 1. Önce bu sınava bağlı SinavSalonu ID'lerini bul.
+                var sinavSalonuIdleri = await _context.SinavSalonlari
+                    .Where(ss => ss.SinavID == id)
+                    .Select(ss => ss.SinavSalonuID)
+                    .ToListAsync();
 
+                // 2. Önce bağlı GözetmenAtama kayıtlarını sil.
+                var gozetmenAtamalari = await _context.GozetmenAtamalari
+                    .Where(ga => sinavSalonuIdleri.Contains(ga.SinavSalonuID))
+                    .ToListAsync();
+
+                if (gozetmenAtamalari.Any())
+                {
+                    _context.GozetmenAtamalari.RemoveRange(gozetmenAtamalari);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 3. Sonra bağlı SinavSalonu kayıtlarını sil.
+                var sinavSalonlari = await _context.SinavSalonlari
+                    .Where(ss => ss.SinavID == id)
+                    .ToListAsync();
+
+                if (sinavSalonlari.Any())
+                {
+                    _context.SinavSalonlari.RemoveRange(sinavSalonlari);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 4. En son Sinav kaydını sil.
+                _context.Sinavlar.Remove(sinav);
                 await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
 
-                TempData["SuccessMessage"] = "Sınav başarıyla silindi.";
+                TempData["SuccessMessage"] = "Sınav, bağlı gözetmen atamaları ve salon kayıtlarıyla birlikte başarıyla silindi.";
             }
             catch (Exception ex)
             {
@@ -328,6 +359,7 @@ namespace OBS_Projesi.Controllers
 
         // Eski Ekle action'ı kullanılmışsa bozulmasın diye Olustur'a yönlendiriyoruz.
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Ekle()
         {
             return RedirectToAction(nameof(Olustur));
