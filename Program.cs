@@ -1,18 +1,18 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+ï»¿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using OBS_Projesi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Connection string kontrolü
+// Connection string kontrolÃ¼
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException("DefaultConnection connection string bulunamadý. appsettings.json dosyasýný kontrol et.");
+    throw new InvalidOperationException("DefaultConnection connection string bulunamadÄ±. appsettings.json dosyasÄ±nÄ± kontrol et.");
 }
 
-// MSSQL baðlantýsýný servislere ekle
+// MSSQL baÄŸlantÄ±sÄ±nÄ± servislere ekle
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -29,6 +29,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 var app = builder.Build();
 
+// Admin kullanÄ±cÄ±sÄ±nÄ± hazÄ±rla
+await DbInitializer.SeedAdminUserAsync(app.Services);
+
 // HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
@@ -37,11 +40,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(

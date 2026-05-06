@@ -18,6 +18,7 @@ namespace OBS_Projesi.Controllers
         public async Task<IActionResult> Index()
         {
             var loglar = await _context.SinavLoglar
+                .AsNoTracking()
                 .Include(l => l.Sinav)
                     .ThenInclude(s => s.Ders)
                 .Include(l => l.Sinav)

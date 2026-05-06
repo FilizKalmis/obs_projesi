@@ -2,203 +2,47 @@
 
 @{
     ViewData["Title"] = "Log Kayıtları";
-
     var loglar = Model ?? new List<OBS_Projesi.Models.SinavLog>();
 }
 
-<style>
-    .log-page {
-        color: #ffffff;
-    }
+<div class="page-header">
+    <div>
+        <h2>Log Kayıtları</h2>
+        <p>Sınav değişiklik geçmişi</p>
+    </div>
+</div>
 
-        .log-page .page-title {
-            color: #ffffff;
-            font-weight: 700;
-        }
-
-        .log-page .page-subtitle {
-            color: #cbd5e1 !important;
-        }
-
-    .log-stat-card {
-        background: #ffffff;
-        color: #111827;
-        border: none;
-        border-radius: 16px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
-    }
-
-        .log-stat-card .stat-label {
-            color: #6b7280 !important;
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-
-        .log-stat-card .stat-number {
-            color: #111827;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-    .log-card {
-        background: #ffffff;
-        color: #111827;
-        border: none;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
-    }
-
-    .log-card-header {
-        background: #ffffff;
-        color: #111827;
-        padding: 22px 24px;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-        .log-card-header h5 {
-            color: #111827;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .log-card-header small {
-            color: #6b7280 !important;
-        }
-
-    .log-table {
-        background: #ffffff;
-        color: #111827;
-        margin-bottom: 0;
-    }
-
-        .log-table thead th {
-            background: #f3f4f6 !important;
-            color: #111827 !important;
-            font-weight: 700;
-            border-bottom: 1px solid #d1d5db;
-            white-space: nowrap;
-            vertical-align: middle;
-        }
-
-        .log-table tbody td {
-            background: #ffffff !important;
-            color: #111827 !important;
-            border-bottom: 1px solid #e5e7eb;
-            vertical-align: middle;
-        }
-
-        .log-table tbody tr:hover td {
-            background: #f9fafb !important;
-            color: #111827 !important;
-        }
-
-    .log-date {
-        color: #111827 !important;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .log-course {
-        color: #111827 !important;
-        font-weight: 700;
-    }
-
-    .log-subtext {
-        color: #6b7280 !important;
-        font-size: 13px;
-    }
-
-    .log-person {
-        color: #111827 !important;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .log-value {
-        display: inline-block;
-        border-radius: 12px;
-        padding: 7px 11px;
-        font-weight: 700;
-        font-size: 14px;
-        line-height: 1.2;
-    }
-
-    .old-value {
-        background: #fef2f2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
-    }
-
-    .new-value {
-        background: #ecfdf5;
-        color: #047857;
-        border: 1px solid #a7f3d0;
-    }
-
-    .empty-log {
-        color: #6b7280 !important;
-        padding: 48px 0;
-    }
-</style>
-
-<div class="container-fluid px-4 py-4 log-page">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="page-title mb-1">Log Kayıtları</h2>
-            <p class="page-subtitle mb-0">
-                Sınav işlemlerinde yapılan değişiklikleri, eski ve yeni değerleriyle takip edin.
-            </p>
-        </div>
+<div class="stats-grid">
+    <div class="stat-card">
+        <span>Toplam Kayıt</span>
+        <h3>@loglar.Count</h3>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card log-stat-card">
-                <div class="card-body">
-                    <p class="stat-label">Toplam Log</p>
-                    <h3 class="stat-number">@loglar.Count</h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card log-stat-card">
-                <div class="card-body">
-                    <p class="stat-label">Bugünkü Log</p>
-                    <h3 class="stat-number">
-                        @loglar.Count(x => x.IslemTarihi.Date == DateTime.Today)
-                    </h3>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card log-stat-card">
-                <div class="card-body">
-                    <p class="stat-label">İşlem Türü Sayısı</p>
-                    <h3 class="stat-number">
-                        @loglar.Select(x => x.IslemTuru).Distinct().Count()
-                    </h3>
-                </div>
-            </div>
-        </div>
+    <div class="stat-card">
+        <span>Bugünkü Kayıt</span>
+        <h3>@loglar.Count(x => x.IslemTarihi.Date == DateTime.Today)</h3>
     </div>
 
-    <div class="log-card">
-        <div class="log-card-header">
-            <h5>Sınav İşlem Logları</h5>
-            <small>Eski değer, yeni değer ve değişikliği yapan kişi bilgisi</small>
-        </div>
+    <div class="stat-card">
+        <span>İşlem Türü</span>
+        <h3>@loglar.Select(x => x.IslemTuru).Distinct().Count()</h3>
+    </div>
+</div>
 
+<div class="card">
+    <div class="card-header">
+        <h5>Sınav Değişiklikleri</h5>
+        <span class="viewer-badge">@loglar.Count kayıt</span>
+    </div>
+
+    @if (loglar.Any())
+    {
         <div class="table-responsive">
-            <table class="table table-hover align-middle log-table">
+            <table class="table custom-table">
                 <thead>
                     <tr>
-                        <th class="ps-4">İşlem Tarihi</th>
-                        <th>İşlem Türü</th>
+                        <th>İşlem Tarihi</th>
+                        <th>İşlem</th>
                         <th>Sınav</th>
                         <th>Eski Değer</th>
                         <th>Yeni Değer</th>
@@ -207,83 +51,59 @@
                 </thead>
 
                 <tbody>
-                    @if (loglar.Any())
-                    {
-                        foreach (var log in loglar)
-                        {
-                            <tr>
-                                <td class="ps-4">
-                                    <span class="log-date">
-                                        @log.IslemTarihi.ToString("dd.MM.yyyy HH:mm")
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="badge bg-primary">
-                                        @log.IslemTuru
-                                    </span>
-                                </td>
-
-                                <td>
-                                    @if (log.Sinav != null)
-                                    {
-                                        <div class="log-course">
-                                            @log.Sinav.Ders?.DersKodu -
-                                            @log.Sinav.Ders?.DersAdi
-                                        </div>
-
-                                        <div class="log-subtext">
-                                            @log.Sinav.Tarih.ToString("dd.MM.yyyy")
-                                            |
-                                            @log.Sinav.Oturum?.Tanim
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <span class="log-subtext">Sınav bilgisi yok</span>
-                                    }
-                                </td>
-
-                                <td>
-                                    <span class="log-value old-value">
-                                        @log.EskiDeger
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="log-value new-value">
-                                        @log.YeniDeger
-                                    </span>
-                                </td>
-
-                                <td>
-                                    @if (log.DegistirenPersonel != null)
-                                    {
-                                        <span class="log-person">
-                                            @log.DegistirenPersonel.Unvan
-                                            @log.DegistirenPersonel.Ad
-                                            @log.DegistirenPersonel.Soyad
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="log-subtext">Sistem/Admin</span>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
+                    @foreach (var log in loglar)
                     {
                         <tr>
-                            <td colspan="6" class="text-center empty-log">
-                                Henüz log kaydı bulunmamaktadır.
+                            <td>@log.IslemTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+
+                            <td>
+                                <span class="viewer-badge">@log.IslemTuru</span>
+                            </td>
+
+                            <td>
+                                @if (log.Sinav != null)
+                                {
+                                    <div>
+                                        <strong>@log.Sinav.Ders?.DersKodu - @log.Sinav.Ders?.DersAdi</strong>
+                                    </div>
+                                    <small class="text-muted">
+                                        @log.Sinav.Tarih.ToString("dd.MM.yyyy") / @log.Sinav.Oturum?.Tanim
+                                    </small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sınav bilgisi yok</span>
+                                }
+                            </td>
+
+                            <td>@log.EskiDeger</td>
+
+                            <td>@log.YeniDeger</td>
+
+                            <td>
+                                @if (log.DegistirenPersonel != null)
+                                {
+                                    <span>
+                                        @log.DegistirenPersonel.Unvan
+                                        @log.DegistirenPersonel.Ad
+                                        @log.DegistirenPersonel.Soyad
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>Sistem</span>
+                                }
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
-    </div>
-
+    }
+    else
+    {
+        <div class="empty-state">
+            Henüz kayıt bulunmamaktadır.
+        </div>
+    }
 </div>

@@ -954,3 +954,80 @@ a {
         grid-template-columns: 1fr;
     }
 }
+.menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    margin-right: 8px;
+    font-size: 15px;
+}
+.menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    margin-right: 8px;
+    font-size: 15px;
+}
+.info-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    color: #374151;
+    margin-bottom: 18px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.pool-info-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+}
+
+    .pool-info-card.passive {
+        background: #f9fafb;
+        border-color: #e5e7eb;
+    }
+
+    .pool-info-card h4 {
+        margin: 0 0 6px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #065f46;
+    }
+
+    .pool-info-card.passive h4 {
+        color: #374151;
+    }
+
+    .pool-info-card p {
+        margin: 0;
+        color: #374151;
+        font-size: 14px;
+    }
+
+.pool-badge {
+    background: #10b981;
+    color: white;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+    .pool-badge.passive {
+        background: #9ca3af;
+    }

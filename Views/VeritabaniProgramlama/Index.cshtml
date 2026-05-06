@@ -8,7 +8,7 @@
 <div class="page-header">
     <div>
         <h2>Veritabanı Programlama</h2>
-        <p>Stored Procedure ve User Defined Function çağrılarının uygulama üzerinden test edildiği ekran.</p>
+        <p>Salon atama, gözetmen atama ve kontrol işlemleri</p>
     </div>
 
     <a asp-controller="Rapor" asp-action="Index" class="btn btn-secondary">
@@ -50,14 +50,11 @@
 <div class="two-column-grid">
     <div class="card programming-card">
         <div class="card-header">
-            <h5>SP: Akıllı Salon Ata</h5>
-            <span class="viewer-badge">sp_AkilliSalonAta</span>
+            <h5>Akıllı Salon Ata</h5>
         </div>
 
         <div class="card-body">
-            <p>
-                Seçilen sınav için Stored Procedure üzerinden salon atama işlemini çalıştırır.
-            </p>
+            <p>Seçilen sınav için uygun salonları atar.</p>
 
             @if (isAdmin)
             {
@@ -74,14 +71,14 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary">
-                        SP Çalıştır
+                        Çalıştır
                     </button>
                 </form>
             }
             else
             {
                 <div class="empty-state">
-                    Viewer kullanıcısı SP çalıştıramaz.
+                    Viewer kullanıcısı bu işlemi yapamaz.
                 </div>
             }
         </div>
@@ -89,14 +86,11 @@
 
     <div class="card programming-card">
         <div class="card-header">
-            <h5>SP: Havuzdan Gözetmen Ata</h5>
-            <span class="viewer-badge">sp_GozetmenHavuzundanAta</span>
+            <h5>Havuzdan Gözetmen Ata</h5>
         </div>
 
         <div class="card-body">
-            <p>
-                Seçilen sınav salonuna Stored Procedure üzerinden gözetmen atama işlemini çalıştırır.
-            </p>
+            <p>Seçilen sınav salonuna uygun gözetmen atar.</p>
 
             @if (isAdmin)
             {
@@ -113,14 +107,14 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary">
-                        SP Çalıştır
+                        Çalıştır
                     </button>
                 </form>
             }
             else
             {
                 <div class="empty-state">
-                    Viewer kullanıcısı SP çalıştıramaz.
+                    Viewer kullanıcısı bu işlemi yapamaz.
                 </div>
             }
         </div>
@@ -128,14 +122,40 @@
 
     <div class="card programming-card">
         <div class="card-header">
-            <h5>UDF: Kapasite Kontrol</h5>
-            <span class="viewer-badge">fn_KapasiteKontrol</span>
+            <h5>Yedek Al</h5>
         </div>
 
         <div class="card-body">
-            <p>
-                Seçilen sınav için atanan salonların toplam kapasitesinin yeterli olup olmadığını kontrol eder.
-            </p>
+            <p>Sistemin güncel yedeğini oluşturur.</p>
+
+            @if (isAdmin)
+            {
+                <form asp-controller="VeritabaniProgramlama"
+                      asp-action="YedekAl"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit" class="btn btn-primary">
+                        Çalıştır
+                    </button>
+                </form>
+            }
+            else
+            {
+                <div class="empty-state">
+                    Viewer kullanıcısı bu işlemi yapamaz.
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card programming-card">
+        <div class="card-header">
+            <h5>Kapasite Kontrol</h5>
+        </div>
+
+        <div class="card-body">
+            <p>Seçilen sınav için salon kapasitesinin yeterli olup olmadığını kontrol eder.</p>
 
             <form asp-controller="VeritabaniProgramlama"
                   asp-action="KapasiteKontrol"
@@ -150,7 +170,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-success">
-                    UDF Kontrol Et
+                    Çalıştır
                 </button>
             </form>
 
@@ -166,14 +186,11 @@
 
     <div class="card programming-card">
         <div class="card-header">
-            <h5>UDF: Yarıyıl Çakışma Kontrol</h5>
-            <span class="viewer-badge">fn_YariyilCakismaKontrol</span>
+            <h5>Yarıyıl Çakışma Kontrol</h5>
         </div>
 
         <div class="card-body">
-            <p>
-                Girilen yarıyıl, tarih ve oturum için sınav çakışması olup olmadığını kontrol eder.
-            </p>
+            <p>Girilen yarıyıl, tarih ve oturum için sınav çakışmasını kontrol eder.</p>
 
             <form asp-controller="VeritabaniProgramlama"
                   asp-action="YariyilCakismaKontrol"
@@ -198,7 +215,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-success">
-                    UDF Kontrol Et
+                    Çalıştır
                 </button>
             </form>
 
@@ -207,6 +224,53 @@
                 <div class="result-box">
                     <strong>Sonuç:</strong>
                     @(Model.YariyilCakismaVarMi == true ? "Çakışma var" : "Çakışma yok")
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card programming-card">
+        <div class="card-header">
+            <h5>Gözetmen Uygunluk Kontrol</h5>
+        </div>
+
+        <div class="card-body">
+            <p>Seçilen gözetmenin ilgili oturum için uygun olup olmadığını kontrol eder.</p>
+
+            <form asp-controller="VeritabaniProgramlama"
+                  asp-action="GozetmenUygunlukKontrol"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label>Gözetmen</label>
+                    <select asp-for="PersonelID" class="form-control" asp-items="ViewBag.Personeller">
+                        <option value="">Gözetmen seçiniz</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Tarih</label>
+                    <input asp-for="Tarih" type="date" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label>Oturum</label>
+                    <select asp-for="OturumID" class="form-control" asp-items="ViewBag.Oturumlar">
+                        <option value="">Oturum seçiniz</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Çalıştır
+                </button>
+            </form>
+
+            @if (Model.GozetmenUygunMu != null)
+            {
+                <div class="result-box">
+                    <strong>Sonuç:</strong>
+                    @(Model.GozetmenUygunMu == true ? "Gözetmen uygun" : "Gözetmen uygun değil")
                 </div>
             }
         </div>

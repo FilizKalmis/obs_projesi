@@ -41,10 +41,18 @@ namespace OBS_Projesi.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Ekle()
+        public async Task<IActionResult> Ekle(int? sinavSalonuID)
         {
-            await SelectListleriHazirla();
-            return View();
+            await SelectListleriHazirla(sinavSalonuID);
+
+            var model = new GozetmenAtama();
+
+            if (sinavSalonuID.HasValue)
+            {
+                model.SinavSalonuID = sinavSalonuID.Value;
+            }
+
+            return View(model);
         }
 
         [HttpPost]
@@ -52,6 +60,9 @@ namespace OBS_Projesi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Ekle([Bind("SinavSalonuID,PersonelID")] GozetmenAtama atama)
         {
+            ModelState.Remove("Personel");
+            ModelState.Remove("SinavSalonu");
+
             await AtamaKurallariniKontrolEt(atama);
 
             if (!ModelState.IsValid)
@@ -98,6 +109,9 @@ namespace OBS_Projesi.Controllers
             {
                 return NotFound();
             }
+
+            ModelState.Remove("Personel");
+            ModelState.Remove("SinavSalonu");
 
             await AtamaKurallariniKontrolEt(atama, atama.AtamaID);
 
@@ -158,28 +172,25 @@ namespace OBS_Projesi.Controllers
                 .ThenBy(ss => ss.Derslik.Ad)
                 .ToListAsync();
 
-            var sinavSalonuSelect = sinavSalonlari.Select(ss => new
-            {
-                ss.SinavSalonuID,
-                Bilgi = $"{ss.Sinav.Tarih:dd.MM.yyyy} | {ss.Sinav.Oturum.Tanim} | {ss.Sinav.Ders.DersKodu} - {ss.Sinav.Ders.DersAdi} | Salon: {ss.Derslik.Ad}"
-            }).ToList();
-
-            ViewBag.SinavSalonlari = new SelectList(
-                sinavSalonuSelect,
-                "SinavSalonuID",
-                "Bilgi",
-                seciliSinavSalonuID
-            );
+            ViewBag.SinavSalonlari = sinavSalonlari
+                .Select(ss => new SelectListItem
+                {
+                    Value = ss.SinavSalonuID.ToString(),
+                    Text = $"{ss.Sinav?.Tarih:dd.MM.yyyy} | {ss.Sinav?.Oturum?.Tanim} | {ss.Sinav?.Ders?.DersKodu} - {ss.Sinav?.Ders?.DersAdi} | Salon: {ss.Derslik?.Ad}",
+                    Selected = seciliSinavSalonuID.HasValue && ss.SinavSalonuID == seciliSinavSalonuID.Value
+                })
+                .ToList();
 
             int? seciliSinavBolumID = null;
+            string? seciliBolumAdi = null;
 
             if (seciliSinavSalonuID.HasValue)
             {
-                seciliSinavBolumID = sinavSalonlari
-                    .FirstOrDefault(ss => ss.SinavSalonuID == seciliSinavSalonuID.Value)
-                    ?.Sinav
-                    ?.Ders
-                    ?.BolumID;
+                var seciliSinavSalonu = sinavSalonlari
+                    .FirstOrDefault(ss => ss.SinavSalonuID == seciliSinavSalonuID.Value);
+
+                seciliSinavBolumID = seciliSinavSalonu?.Sinav?.Ders?.BolumID;
+                seciliBolumAdi = seciliSinavSalonu?.Sinav?.Ders?.Bolum?.BolumAdi;
             }
 
             var gorevSayilari = await _context.GozetmenAtamalari
@@ -195,14 +206,43 @@ namespace OBS_Projesi.Controllers
                 .Include(p => p.Bolum)
                 .ToListAsync();
 
+            var bolumGrubu = new SelectListGroup
+            {
+                Name = seciliBolumAdi != null
+                    ? $"{seciliBolumAdi} Gözetmenleri"
+                    : "Gözetmenler"
+            };
+
+            var ortakHavuzGrubu = new SelectListGroup
+            {
+                Name = "Mühendislik Fakültesi Ortak Havuzu"
+            };
+
+            var tumGozetmenlerGrubu = new SelectListGroup
+            {
+                Name = "Tüm Gözetmenler"
+            };
+
             var personelSelect = personeller
                 .Select(p =>
                 {
-                    int gorevSayisi = gorevSayilari.ContainsKey(p.PersonelID)
+                    var gorevSayisi = gorevSayilari.ContainsKey(p.PersonelID)
                         ? gorevSayilari[p.PersonelID]
                         : 0;
 
-                    bool ayniBolum = seciliSinavBolumID.HasValue && p.BolumID == seciliSinavBolumID.Value;
+                    var ayniBolum = seciliSinavBolumID.HasValue &&
+                                    p.BolumID == seciliSinavBolumID.Value;
+
+                    SelectListGroup grup;
+
+                    if (!seciliSinavBolumID.HasValue)
+                    {
+                        grup = tumGozetmenlerGrubu;
+                    }
+                    else
+                    {
+                        grup = ayniBolum ? bolumGrubu : ortakHavuzGrubu;
+                    }
 
                     return new
                     {
@@ -210,7 +250,8 @@ namespace OBS_Projesi.Controllers
                         p.BolumID,
                         GorevSayisi = gorevSayisi,
                         AyniBolum = ayniBolum,
-                        Bilgi = $"{p.Unvan} {p.Ad} {p.Soyad} | {p.Bolum.BolumAdi} | Görev: {gorevSayisi}"
+                        Bilgi = $"{p.Unvan} {p.Ad} {p.Soyad} | {p.Bolum?.BolumAdi ?? "-"} | Görev: {gorevSayisi}",
+                        Grup = grup
                     };
                 })
                 .OrderByDescending(p => p.AyniBolum)
@@ -219,12 +260,15 @@ namespace OBS_Projesi.Controllers
                 .ThenBy(p => p.Bilgi)
                 .ToList();
 
-            ViewBag.Personeller = new SelectList(
-                personelSelect,
-                "PersonelID",
-                "Bilgi",
-                seciliPersonelID
-            );
+            ViewBag.Personeller = personelSelect
+                .Select(p => new SelectListItem
+                {
+                    Value = p.PersonelID.ToString(),
+                    Text = p.Bilgi,
+                    Group = p.Grup,
+                    Selected = seciliPersonelID.HasValue && p.PersonelID == seciliPersonelID.Value
+                })
+                .ToList();
 
             ViewBag.PersonelYukleri = personelSelect
                 .Select(p => new
@@ -233,6 +277,9 @@ namespace OBS_Projesi.Controllers
                     p.GorevSayisi
                 })
                 .ToList();
+
+            ViewBag.OrtakHavuzAktif = seciliSinavBolumID.HasValue;
+            ViewBag.SeciliBolumAdi = seciliBolumAdi;
         }
 
         private async Task AtamaKurallariniKontrolEt(GozetmenAtama atama, int? mevcutAtamaID = null)
@@ -251,7 +298,8 @@ namespace OBS_Projesi.Controllers
                 return;
             }
 
-            bool personelVarMi = await _context.Personeller.AnyAsync(p => p.PersonelID == atama.PersonelID);
+            bool personelVarMi = await _context.Personeller
+                .AnyAsync(p => p.PersonelID == atama.PersonelID);
 
             if (!personelVarMi)
             {

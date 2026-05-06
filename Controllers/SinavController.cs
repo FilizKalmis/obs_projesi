@@ -116,34 +116,36 @@ namespace OBS_Projesi.Controllers
                 return View(model);
             }
 
-            // Aynı yarıyıldaki dersler aynı gün aynı oturuma konulmasın.
+            // Aynı bölüm ve aynı yarıyıldaki dersler aynı gün aynı oturuma konulmasın.
             var yariyilCakismaVarMi = await _context.Sinavlar
                 .Include(s => s.Ders)
                 .AnyAsync(s =>
                     s.Tarih >= gunBaslangic &&
                     s.Tarih < gunBitis &&
                     s.OturumID == model.OturumID &&
-                    s.Ders.Yariyil == ders.Yariyil
+                    s.Ders.Yariyil == ders.Yariyil &&
+                    s.Ders.BolumID == ders.BolumID
                 );
 
             if (yariyilCakismaVarMi)
             {
-                ModelState.AddModelError("", "Bu yarıyıla ait başka bir ders aynı gün ve aynı oturumda zaten planlanmış.");
+                ModelState.AddModelError("", "Bu bölüm ve yarıyıla ait başka bir ders aynı gün ve aynı oturumda zaten planlanmış.");
                 return View(model);
             }
 
-            // Aynı yarıyıl için bir güne 2'den fazla sınav uyarısı
+            // Aynı bölüm ve aynı yarıyıl için bir güne 2'den fazla sınav uyarısı
             var gunlukYariyilSinavSayisi = await _context.Sinavlar
                 .Include(s => s.Ders)
                 .CountAsync(s =>
                     s.Tarih >= gunBaslangic &&
                     s.Tarih < gunBitis &&
-                    s.Ders.Yariyil == ders.Yariyil
+                    s.Ders.Yariyil == ders.Yariyil &&
+                    s.Ders.BolumID == ders.BolumID
                 );
 
             if (gunlukYariyilSinavSayisi >= 2)
             {
-                TempData["WarningMessage"] = $"{ders.Yariyil}. yarıyıl için bu güne 2'den fazla sınav planlanıyor. Kontrol etmeniz önerilir.";
+                TempData["WarningMessage"] = $"{ders.Bolum?.BolumAdi} bölümü {ders.Yariyil}. yarıyıl için bu güne 2'den fazla sınav planlanıyor. Kontrol etmeniz önerilir.";
             }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -171,25 +173,94 @@ namespace OBS_Projesi.Controllers
                     .Select(ss => ss.DerslikID)
                     .ToListAsync();
 
-                // Boş ve aktif derslikleri kapasiteye göre büyükten küçüğe sırala.
+                // Boş ve aktif derslikleri al.
                 var bosDerslikler = await _context.Derslikler
                     .Where(d =>
                         d.Aktif &&
                         !kullanilanDerslikIDleri.Contains(d.DerslikID)
                     )
-                    .OrderByDescending(d => d.Kapasite)
                     .ToListAsync();
 
-                var kalanOgrenciSayisi = ders.OgrenciSayisi;
+                if (!bosDerslikler.Any())
+                {
+                    throw new Exception("Uygun boş derslik bulunamadı. Sınav oluşturulmadı.");
+                }
+
+                var hedefOgrenciSayisi = ders.OgrenciSayisi;
+                var secilenDerslikler = new List<Derslik>();
+
+                // Önce aynı katta yeterli kapasite var mı kontrol et.
+                var ayniKattaUygunSecenek = bosDerslikler
+                    .GroupBy(d => d.Kat)
+                    .Select(grup =>
+                    {
+                        var siraliDerslikler = grup
+                            .OrderByDescending(d => d.Kapasite)
+                            .ToList();
+
+                        var secilenler = new List<Derslik>();
+                        var kalan = hedefOgrenciSayisi;
+
+                        foreach (var derslik in siraliDerslikler)
+                        {
+                            if (kalan <= 0)
+                            {
+                                break;
+                            }
+
+                            secilenler.Add(derslik);
+                            kalan -= derslik.Kapasite;
+                        }
+
+                        return new
+                        {
+                            Kat = grup.Key,
+                            Derslikler = secilenler,
+                            ToplamKapasite = secilenler.Sum(d => d.Kapasite),
+                            Kalan = kalan
+                        };
+                    })
+                    .Where(x => x.Kalan <= 0)
+                    .OrderBy(x => x.Derslikler.Count)
+                    .ThenBy(x => x.ToplamKapasite)
+                    .FirstOrDefault();
+
+                if (ayniKattaUygunSecenek != null)
+                {
+                    secilenDerslikler = ayniKattaUygunSecenek.Derslikler;
+                }
+                else
+                {
+                    // Aynı katta yeterli kapasite yoksa genel kapasite sıralamasına geç.
+                    var genelSiraliDerslikler = bosDerslikler
+                        .OrderByDescending(d => d.Kapasite)
+                        .ToList();
+
+                    var kalan = hedefOgrenciSayisi;
+
+                    foreach (var derslik in genelSiraliDerslikler)
+                    {
+                        if (kalan <= 0)
+                        {
+                            break;
+                        }
+
+                        secilenDerslikler.Add(derslik);
+                        kalan -= derslik.Kapasite;
+                    }
+                }
+
+                var toplamSecilenKapasite = secilenDerslikler.Sum(d => d.Kapasite);
+
+                if (toplamSecilenKapasite < hedefOgrenciSayisi)
+                {
+                    throw new Exception("Yeterli boş derslik bulunamadı. Sınav oluşturulmadı.");
+                }
+
                 var atananSalonlar = new List<string>();
 
-                foreach (var derslik in bosDerslikler)
+                foreach (var derslik in secilenDerslikler)
                 {
-                    if (kalanOgrenciSayisi <= 0)
-                    {
-                        break;
-                    }
-
                     var sinavSalonu = new SinavSalonu
                     {
                         SinavID = sinav.SinavID,
@@ -198,13 +269,7 @@ namespace OBS_Projesi.Controllers
 
                     _context.SinavSalonlari.Add(sinavSalonu);
 
-                    kalanOgrenciSayisi -= derslik.Kapasite;
-                    atananSalonlar.Add($"{derslik.Ad} ({derslik.Kapasite})");
-                }
-
-                if (kalanOgrenciSayisi > 0)
-                {
-                    throw new Exception("Yeterli boş derslik bulunamadı. Sınav oluşturulmadı.");
+                    atananSalonlar.Add($"{derslik.Ad} ({derslik.Kapasite} kişi / {derslik.Kat})");
                 }
 
                 await _context.SaveChangesAsync();
@@ -266,11 +331,57 @@ namespace OBS_Projesi.Controllers
             }
 
             var mevcutSinav = await _context.Sinavlar
+                .Include(s => s.Ders)
                 .FirstOrDefaultAsync(s => s.SinavID == id);
 
             if (mevcutSinav == null)
             {
                 return NotFound();
+            }
+
+            var yeniDers = await _context.Dersler
+                .FirstOrDefaultAsync(d => d.DersID == sinav.DersID);
+
+            if (yeniDers == null)
+            {
+                ModelState.AddModelError("", "Seçilen ders bulunamadı.");
+                return View(sinav);
+            }
+
+            var gunBaslangic = sinav.Tarih.Date;
+            var gunBitis = gunBaslangic.AddDays(1);
+
+            // Düzenleme sırasında aynı bölüm + aynı yarıyıl + aynı tarih + aynı oturum çakışması kontrolü
+            var cakismaVarMi = await _context.Sinavlar
+                .Include(s => s.Ders)
+                .AnyAsync(s =>
+                    s.SinavID != id &&
+                    s.Tarih >= gunBaslangic &&
+                    s.Tarih < gunBitis &&
+                    s.OturumID == sinav.OturumID &&
+                    s.Ders.Yariyil == yeniDers.Yariyil &&
+                    s.Ders.BolumID == yeniDers.BolumID
+                );
+
+            if (cakismaVarMi)
+            {
+                ModelState.AddModelError("", "Bu bölüm ve yarıyıla ait başka bir ders aynı gün ve aynı oturumda zaten planlanmış.");
+                return View(sinav);
+            }
+
+            var gunlukSinavSayisi = await _context.Sinavlar
+                .Include(s => s.Ders)
+                .CountAsync(s =>
+                    s.SinavID != id &&
+                    s.Tarih >= gunBaslangic &&
+                    s.Tarih < gunBitis &&
+                    s.Ders.Yariyil == yeniDers.Yariyil &&
+                    s.Ders.BolumID == yeniDers.BolumID
+                );
+
+            if (gunlukSinavSayisi >= 2)
+            {
+                TempData["WarningMessage"] = $"{yeniDers.Yariyil}. yarıyıl için bu güne 2'den fazla sınav planlanıyor. Kontrol etmeniz önerilir.";
             }
 
             mevcutSinav.DersID = sinav.DersID;

@@ -4,88 +4,132 @@
     ViewData["Title"] = "Yeni Gözetmen Ataması";
 }
 
-<div class="container-fluid px-4 py-4">
-
-    <div class="mb-4">
-        <h2 class="fw-bold mb-1">Yeni Gözetmen Ataması</h2>
-        <p class="text-muted mb-0">
-            Seçilen sınav salonuna uygun bir gözetmen atayın.
-        </p>
+<div class="page-header">
+    <div>
+        <h2>Yeni Gözetmen Ataması</h2>
+        <p>Seçilen sınav salonuna uygun gözetmen atayın.</p>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-4">
+    <a asp-controller="GozetmenAtama" asp-action="Index" class="btn btn-secondary">
+        Geri Dön
+    </a>
+</div>
 
-            <form asp-controller="GozetmenAtama" asp-action="Ekle" method="post">
-                @Html.AntiForgeryToken()
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
 
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
 
-                <div class="row g-3">
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+    </div>
+}
 
-                    <div class="col-md-12">
-                        <label asp-for="SinavSalonuID" class="form-label fw-semibold">
-                            Sınav Salonu
-                        </label>
+<div class="card">
+    <div class="card-header">
+        <h5>Gözetmen Atama Bilgileri</h5>
+    </div>
 
-                        <select asp-for="SinavSalonuID"
-                                asp-items="ViewBag.SinavSalonlari"
-                                class="form-select">
-                            <option value="">Sınav salonu seçiniz</option>
-                        </select>
+    <div class="card-body">
+        <form asp-controller="GozetmenAtama" asp-action="Ekle" method="post">
+            @Html.AntiForgeryToken()
 
-                        <span asp-validation-for="SinavSalonuID" class="text-danger small"></span>
-                    </div>
+            <div class="form-group">
+                <label>Sınav Salonu</label>
+                <select asp-for="SinavSalonuID"
+                        id="sinavSalonuSelect"
+                        class="form-control"
+                        asp-items="ViewBag.SinavSalonlari">
+                    <option value="">Sınav salonu seçiniz</option>
+                </select>
+                <span asp-validation-for="SinavSalonuID" class="text-danger"></span>
+            </div>
 
-                    <div class="col-md-12">
-                        <label asp-for="PersonelID" class="form-label fw-semibold">
-                            Gözetmen
-                        </label>
-
-                        <select asp-for="PersonelID"
-                                asp-items="ViewBag.Personeller"
-                                class="form-select">
-                            <option value="">Gözetmen seçiniz</option>
-                        </select>
-
-                        <span asp-validation-for="PersonelID" class="text-danger small"></span>
-                    </div>
-
-                </div>
-
-                <div class="alert alert-info border-0 mt-4 mb-0">
-                    <div class="fw-semibold mb-1">
-                        <i class="bi bi-info-circle me-1"></i>Atama Kontrolleri
-                    </div>
-
+            @if (ViewBag.OrtakHavuzAktif == true)
+            {
+                <div class="pool-info-card">
                     <div>
-                        Sistem aynı tarih ve oturumda görev çakışmasını, personel mazeretini
-                        ve arka arkaya 3 oturum sınırını kontrol eder.
-                        Personel listesinde görev sayısı az olanlar daha üstte gösterilir.
+                        <h4>Ortak Havuz Sistemi Aktif</h4>
+                        <p>
+                            Bu sınav için önce <strong>@ViewBag.SeciliBolumAdi</strong> bölümündeki gözetmenler listelenir.
+                            Gerekirse diğer bölümlerden uygun gözetmenler de seçilebilir.
+                        </p>
                     </div>
+
+                    <span class="pool-badge">Aktif</span>
                 </div>
+            }
+            else
+            {
+                <div class="pool-info-card passive">
+                    <div>
+                        <h4>Gözetmen Listesi</h4>
+                        <p>
+                            Sınav salonu seçtiğinizde ilgili bölüm ve ortak havuz bilgisi burada görünecek.
+                        </p>
+                    </div>
 
-                <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-check-circle me-1"></i>Atama Yap
-                    </button>
-
-                    <a asp-controller="GozetmenAtama"
-                       asp-action="Index"
-                       class="btn btn-outline-secondary px-4">
-                        İptal
-                    </a>
+                    <span class="pool-badge passive">Bekliyor</span>
                 </div>
+            }
 
-            </form>
+            <div class="form-group">
+                <label>Gözetmen</label>
+                <select asp-for="PersonelID"
+                        class="form-control"
+                        asp-items="ViewBag.Personeller">
+                    <option value="">Gözetmen seçiniz</option>
+                </select>
+                <span asp-validation-for="PersonelID" class="text-danger"></span>
+            </div>
 
-        </div>
+            <div class="info-box">
+                Aynı anda başka salonda görevli olan, izinli olan veya arka arkaya görev sınırını aşan gözetmenler atanamaz.
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Atama Yap
+                </button>
+
+                <a asp-controller="GozetmenAtama" asp-action="Index" class="btn btn-secondary">
+                    İptal
+                </a>
+            </div>
+        </form>
     </div>
-
 </div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        const sinavSalonuSelect = document.getElementById("sinavSalonuSelect");
+
+        if (sinavSalonuSelect) {
+            sinavSalonuSelect.addEventListener("change", function () {
+                const selectedValue = this.value;
+
+                if (selectedValue) {
+                    window.location.href = "/GozetmenAtama/Ekle?sinavSalonuID=" + selectedValue;
+                }
+            });
+        }
+    </script>
 }

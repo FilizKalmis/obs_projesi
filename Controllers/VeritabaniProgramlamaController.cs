@@ -53,11 +53,11 @@ namespace OBS_Projesi.Controllers
                     }
                 );
 
-                TempData["SuccessMessage"] = "sp_AkilliSalonAta Stored Procedure başarıyla çağrıldı. Seçilen sınav için salon atama işlemi çalıştırıldı.";
+                TempData["SuccessMessage"] = "Salon atama işlemi başarıyla çalıştırıldı.";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"sp_AkilliSalonAta çalıştırılırken hata oluştu: {ex.Message}";
+                TempData["ErrorMessage"] = $"Salon atama işlemi sırasında hata oluştu: {ex.Message}";
             }
 
             return RedirectToAction(nameof(Index));
@@ -84,11 +84,46 @@ namespace OBS_Projesi.Controllers
                     }
                 );
 
-                TempData["SuccessMessage"] = "sp_GozetmenHavuzundanAta Stored Procedure başarıyla çağrıldı. Seçilen sınav salonuna havuzdan gözetmen atama işlemi çalıştırıldı.";
+                TempData["SuccessMessage"] = "Gözetmen atama işlemi başarıyla çalıştırıldı.";
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"sp_GozetmenHavuzundanAta çalıştırılırken hata oluştu: {ex.Message}";
+                TempData["ErrorMessage"] = $"Gözetmen atama işlemi sırasında hata oluştu: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> YedekAl()
+        {
+            try
+            {
+                var klasor = @"C:\Yedekler";
+
+                if (!Directory.Exists(klasor))
+                {
+                    Directory.CreateDirectory(klasor);
+                }
+
+                var dosyaAdi = $"OBS_Yedek_{DateTime.Now:yyyyMMdd_HHmmss}.bak";
+                var tamYol = Path.Combine(klasor, dosyaAdi);
+
+                await ExecuteNonQueryAsync(
+                    "EXEC sp_VeritabaniYedekle @Yol",
+                    new Dictionary<string, object>
+                    {
+                        { "@Yol", tamYol }
+                    }
+                );
+
+                TempData["SuccessMessage"] = $"Yedek alma işlemi başarıyla tamamlandı. Dosya: {tamYol}";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Yedek alma işlemi sırasında hata oluştu: {ex.Message}";
             }
 
             return RedirectToAction(nameof(Index));
@@ -118,14 +153,14 @@ namespace OBS_Projesi.Controllers
 
                 model.KapasiteYeterliMi = Convert.ToBoolean(sonuc);
                 model.SonucMesaji = model.KapasiteYeterliMi == true
-                    ? "fn_KapasiteKontrol sonucu: Kapasite yeterli."
-                    : "fn_KapasiteKontrol sonucu: Kapasite yetersiz.";
+                    ? "Kapasite yeterli."
+                    : "Kapasite yetersiz.";
 
                 return View("Index", model);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", $"fn_KapasiteKontrol çalıştırılırken hata oluştu: {ex.Message}");
+                ModelState.AddModelError("", $"Kapasite kontrolü sırasında hata oluştu: {ex.Message}");
                 return View("Index", model);
             }
         }
@@ -162,14 +197,60 @@ namespace OBS_Projesi.Controllers
 
                 model.YariyilCakismaVarMi = Convert.ToBoolean(sonuc);
                 model.SonucMesaji = model.YariyilCakismaVarMi == true
-                    ? "fn_YariyilCakismaKontrol sonucu: Bu yarıyıl için seçilen tarih ve oturumda çakışma var."
-                    : "fn_YariyilCakismaKontrol sonucu: Bu yarıyıl için seçilen tarih ve oturumda çakışma yok.";
+                    ? "Seçilen tarih ve oturumda çakışma var."
+                    : "Seçilen tarih ve oturumda çakışma yok.";
 
                 return View("Index", model);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", $"fn_YariyilCakismaKontrol çalıştırılırken hata oluştu: {ex.Message}");
+                ModelState.AddModelError("", $"Çakışma kontrolü sırasında hata oluştu: {ex.Message}");
+                return View("Index", model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GozetmenUygunlukKontrol(SpUdfPanelViewModel model)
+        {
+            await FormListeleriniYukle();
+
+            if (model.PersonelID == null || model.PersonelID <= 0)
+            {
+                ModelState.AddModelError("", "Gözetmen seçimi zorunludur.");
+                return View("Index", model);
+            }
+
+            if (model.OturumID == null || model.OturumID <= 0)
+            {
+                ModelState.AddModelError("", "Oturum seçimi zorunludur.");
+                return View("Index", model);
+            }
+
+            try
+            {
+                var sonuc = await ExecuteScalarAsync(
+                    "SELECT dbo.fn_GozetmenOturumSiniri(@PersonelID, @Tarih, @OturumID)",
+                    new Dictionary<string, object>
+                    {
+                        { "@PersonelID", model.PersonelID.Value },
+                        { "@Tarih", model.Tarih.Date },
+                        { "@OturumID", model.OturumID.Value }
+                    }
+                );
+
+                var kuralaTakiliyorMu = Convert.ToBoolean(sonuc);
+
+                model.GozetmenUygunMu = !kuralaTakiliyorMu;
+                model.SonucMesaji = model.GozetmenUygunMu == true
+                    ? "Gözetmen seçilen oturum için uygun."
+                    : "Gözetmen seçilen oturum için uygun değil.";
+
+                return View("Index", model);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Gözetmen uygunluk kontrolü sırasında hata oluştu: {ex.Message}");
                 return View("Index", model);
             }
         }
@@ -283,6 +364,19 @@ namespace OBS_Projesi.Controllers
                 {
                     Value = o.OturumID.ToString(),
                     Text = $"{o.Tanim} ({o.BaslangicSaat:hh\\:mm} - {o.BitisSaat:hh\\:mm})"
+                })
+                .ToList();
+
+            var personeller = await _context.Personeller
+                .OrderBy(p => p.Ad)
+                .ThenBy(p => p.Soyad)
+                .ToListAsync();
+
+            ViewBag.Personeller = personeller
+                .Select(p => new SelectListItem
+                {
+                    Value = p.PersonelID.ToString(),
+                    Text = $"{p.Unvan} {p.Ad} {p.Soyad}"
                 })
                 .ToList();
         }
