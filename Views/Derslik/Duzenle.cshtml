@@ -1,0 +1,93 @@
+﻿@model OBS_Projesi.Models.Derslik
+
+@{
+    ViewData["Title"] = "Derslik Düzenle";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Derslik Düzenle</h2>
+        <p class="text-muted mb-0">
+            Mevcut derslik bilgilerini güncelleyin.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+
+            <form asp-controller="Derslik"
+                  asp-action="Duzenle"
+                  asp-route-id="@Model.DerslikID"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="DerslikID" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="Ad" class="form-label fw-semibold"></label>
+                        <input asp-for="Ad" class="form-control" />
+                        <span asp-validation-for="Ad" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Kapasite" class="form-label fw-semibold"></label>
+                        <input asp-for="Kapasite" type="number" class="form-control" />
+                        <span asp-validation-for="Kapasite" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Tip" class="form-label fw-semibold">Derslik Tipi</label>
+                        <select asp-for="Tip" class="form-select">
+                            <option value="">Seçiniz</option>
+                            <option value="Amfi">Büyük Amfi</option>
+                            <option value="Sınıf">Sınıf</option>
+                            <option value="Lab">Laboratuvar</option>
+                        </select>
+                        <span asp-validation-for="Tip" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Kat" class="form-label fw-semibold"></label>
+                        <input asp-for="Kat" class="form-control" />
+                        <span asp-validation-for="Kat" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check form-switch mt-2">
+                            <input asp-for="Aktif" class="form-check-input" />
+                            <label asp-for="Aktif" class="form-check-label">
+                                Derslik aktif olarak kullanılsın
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary px-4">
+                        Güncelle
+                    </button>
+
+                    <a asp-controller="Derslik" asp-action="Index" class="btn btn-outline-secondary px-4">
+                        İptal
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

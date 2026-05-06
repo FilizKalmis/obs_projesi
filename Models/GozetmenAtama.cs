@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace OBS_Projesi.Models
 {
@@ -7,15 +8,22 @@ namespace OBS_Projesi.Models
     public class GozetmenAtama
     {
         [Key]
-        public int AtamaID { get; set; } // Diyagrama göre PK
+        public int AtamaID { get; set; }
 
-        public int SinavSalonuID { get; set; } // Hangi sınav ve salon birleşimi?
-        public int PersonelID { get; set; }    // Hangi hoca?
+        [Required(ErrorMessage = "Sınav salonu seçimi zorunludur.")]
+        [Display(Name = "Sınav Salonu")]
+        public int SinavSalonuID { get; set; }
+
+        [Required(ErrorMessage = "Personel seçimi zorunludur.")]
+        [Display(Name = "Gözetmen")]
+        public int PersonelID { get; set; }
 
         [ForeignKey("SinavSalonuID")]
-        public virtual SinavSalonu SinavSalonu { get; set; }
+        [ValidateNever]
+        public SinavSalonu SinavSalonu { get; set; } = null!;
 
         [ForeignKey("PersonelID")]
-        public virtual Personel Personel { get; set; }
+        [ValidateNever]
+        public Personel Personel { get; set; } = null!;
     }
 }

@@ -25,7 +25,12 @@ namespace OBS_Projesi.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Ekle()
         {
-            return View();
+            var model = new Derslik
+            {
+                Aktif = true
+            };
+
+            return View(model);
         }
 
         [HttpPost]
@@ -38,6 +43,66 @@ namespace OBS_Projesi.Controllers
             _context.Derslikler.Add(derslik);
             await _context.SaveChangesAsync();
 
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Duzenle(int id, Derslik derslik)
+        {
+            if (id != derslik.DerslikID)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(derslik);
+            }
+
+            _context.Derslikler.Update(derslik);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Derslik başarıyla güncellendi.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PasifYap(int id)
+        {
+            var derslik = await _context.Derslikler.FindAsync(id);
+
+            if (derslik == null)
+            {
+                return NotFound();
+            }
+
+            derslik.Aktif = false;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Derslik pasif hale getirildi.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AktifYap(int id)
+        {
+            var derslik = await _context.Derslikler.FindAsync(id);
+
+            if (derslik == null)
+            {
+                return NotFound();
+            }
+
+            derslik.Aktif = true;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Derslik aktif hale getirildi.";
             return RedirectToAction(nameof(Index));
         }
     }

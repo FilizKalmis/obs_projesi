@@ -1,72 +1,29 @@
 ﻿@model OBS_Projesi.Models.Ders
 
 @{
-    ViewData["Title"] = "Yeni Ders Ekle";
+    ViewData["Title"] = "Ders Düzenle";
 }
 
-<<<<<<< HEAD
-<h2>Yeni Ders Ekle</h2>
-
-<div class="row">
-    <div class="col-md-6 shadow-sm p-4 bg-white rounded">
-        <form asp-action="Ekle" method="post">
-            @Html.AntiForgeryToken()
-
-            <div class="mb-3">
-                <label asp-for="DersKodu" class="form-label">Ders Kodu</label>
-                <input asp-for="DersKodu" class="form-control" placeholder="Örn: YZM 2126" />
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="DersAdi" class="form-label">Ders Adı</label>
-                <input asp-for="DersAdi" class="form-control" placeholder="Örn: Veritabanı Sistemlerine Giriş" />
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="DersTuru" class="form-label">Ders Türü</label>
-                <select asp-for="DersTuru" class="form-select">
-                    <option value="Zorunlu">Zorunlu</option>
-                    <option value="Seçmeli">Seçmeli</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="OgrenciSayisi" class="form-label">Öğrenci Sayısı</label>
-                <input asp-for="OgrenciSayisi" type="number" class="form-control" />
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Yariyil" class="form-label">Yarıyıl</label>
-                <input asp-for="Yariyil" type="number" class="form-control" min="1" max="8" />
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="BolumID" class="form-label">Bölüm</label>
-                <select asp-for="BolumID" class="form-select" asp-items="ViewBag.Bolumler">
-                    <option value="">Bölüm seçiniz</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Kaydet</button>
-            <a asp-action="Index" class="btn btn-secondary">İptal</a>
-        </form>
-    </div>
-</div>
-=======
 <div class="container-fluid px-4 py-4">
 
     <div class="mb-4">
-        <h2 class="fw-bold mb-1">Yeni Ders Ekle</h2>
+        <h2 class="fw-bold mb-1">Ders Düzenle</h2>
         <p class="text-muted mb-0">
-            Sınav planlamasında kullanılacak ders bilgilerini girin.
+            Mevcut ders bilgilerini güncelleyin.
         </p>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
 
-            <form asp-controller="Ders" asp-action="Ekle" method="post">
+            <form asp-controller="Ders"
+                  asp-action="Duzenle"
+                  asp-route-id="@Model.DersID"
+                  method="post">
+
                 @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="DersID" />
 
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
@@ -74,13 +31,13 @@
 
                     <div class="col-md-6">
                         <label asp-for="DersKodu" class="form-label fw-semibold"></label>
-                        <input asp-for="DersKodu" class="form-control" placeholder="Örn: YZM2126" />
+                        <input asp-for="DersKodu" class="form-control" />
                         <span asp-validation-for="DersKodu" class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="DersAdi" class="form-label fw-semibold"></label>
-                        <input asp-for="DersAdi" class="form-control" placeholder="Örn: Veritabanı Sistemlerine Giriş" />
+                        <input asp-for="DersAdi" class="form-control" />
                         <span asp-validation-for="DersAdi" class="text-danger"></span>
                     </div>
 
@@ -117,7 +74,7 @@
 
                     <div class="col-md-6">
                         <label asp-for="OgrenciSayisi" class="form-label fw-semibold"></label>
-                        <input asp-for="OgrenciSayisi" type="number" class="form-control" placeholder="Örn: 85" />
+                        <input asp-for="OgrenciSayisi" type="number" class="form-control" />
                         <span asp-validation-for="OgrenciSayisi" class="text-danger"></span>
                     </div>
 
@@ -125,7 +82,7 @@
 
                 <div class="d-flex gap-2 mt-4">
                     <button type="submit" class="btn btn-primary px-4">
-                        Kaydet
+                        Güncelle
                     </button>
 
                     <a asp-controller="Ders" asp-action="Index" class="btn btn-outline-secondary px-4">
@@ -145,4 +102,3 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
->>>>>>> 6e0fdc6 (Sınav yönetimi ve temel CRUD ekranları geliştirildi)

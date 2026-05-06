@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿@model IEnumerable<OBS_Projesi.Models.Ders>
 
 @{
@@ -42,3 +43,142 @@
         }
     </tbody>
 </table>
+=======
+﻿@model List<OBS_Projesi.Models.Ders>
+
+@{
+    ViewData["Title"] = "Ders Yönetimi";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Ders Yönetimi</h2>
+            <p class="text-muted mb-0">
+                Sınavı yapılacak dersleri bölüm, yarıyıl ve öğrenci sayısına göre yönetin.
+            </p>
+        </div>
+
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Ders" asp-action="Ekle" class="btn btn-primary px-4">
+                + Yeni Ders
+            </a>
+        }
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Toplam Ders</p>
+                    <h3 class="fw-bold mb-0">@Model.Count</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Toplam Öğrenci</p>
+                    <h3 class="fw-bold mb-0">@Model.Sum(x => x.OgrenciSayisi)</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Bölüm Sayısı</p>
+                    <h3 class="fw-bold mb-0">@Model.Select(x => x.BolumID).Distinct().Count()</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <h5 class="fw-bold mb-0">Ders Listesi</h5>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Ders Kodu</th>
+                            <th>Ders Adı</th>
+                            <th>Ders Türü</th>
+                            <th>Bölüm</th>
+                            <th>Yarıyıl</th>
+                            <th>Öğrenci Sayısı</th>
+                            <th class="text-end pe-4">İşlemler</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model.Any())
+                        {
+                            foreach (var ders in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-semibold">@ders.DersKodu</td>
+                                    <td>@ders.DersAdi</td>
+                                    <td>@ders.DersTuru</td>
+                                    <td>@ders.Bolum?.BolumAdi</td>
+                                    <td>@ders.Yariyil</td>
+                                    <td>@ders.OgrenciSayisi</td>
+                                    <td class="text-end pe-4">
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <a asp-controller="Ders"
+                                               asp-action="Duzenle"
+                                               asp-route-id="@ders.DersID"
+                                               class="btn btn-sm btn-outline-primary me-2">
+                                                Düzenle
+                                            </a>
+
+                                            <form asp-controller="Ders"
+                                                  asp-action="Sil"
+                                                  asp-route-id="@ders.DersID"
+                                                  method="post"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Bu dersi silmek istediğinize emin misiniz?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    Sil
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Sadece görüntüleme</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    Henüz ders eklenmemiş.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+>>>>>>> 6e0fdc6 (Sınav yönetimi ve temel CRUD ekranları geliştirildi)

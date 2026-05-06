@@ -1,27 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace OBS_Projesi.Models
 {
     [Table("Oturum")]
     public class Oturum
     {
-        // Birincil anahtar
         [Key]
         public int OturumID { get; set; }
 
-        // Oturum adı/açıklaması: Sabah-1, Öğle-1 gibi
-        public string Tanim { get; set; }
+        [Required(ErrorMessage = "Oturum tanımı zorunludur.")]
+        [StringLength(50)]
+        [Display(Name = "Oturum Tanımı")]
+        public string Tanim { get; set; } = string.Empty;
 
-        // Oturumun başlangıç saati
+        [Required(ErrorMessage = "Başlangıç saati zorunludur.")]
+        [Display(Name = "Başlangıç Saati")]
         public TimeSpan BaslangicSaat { get; set; }
 
-        // Oturumun bitiş saati
+        [Required(ErrorMessage = "Bitiş saati zorunludur.")]
+        [Display(Name = "Bitiş Saati")]
         public TimeSpan BitisSaat { get; set; }
 
-        // Bir oturumda birden fazla sınav olabilir
-        public ICollection<Sinav> Sinavlar { get; set; }
+        [ValidateNever]
+        public ICollection<Sinav> Sinavlar { get; set; } = new List<Sinav>();
     }
 }

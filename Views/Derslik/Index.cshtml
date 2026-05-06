@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿@model IEnumerable<OBS_Projesi.Models.Derslik>
 
 @{
@@ -40,3 +41,177 @@
         }
     </tbody>
 </table>
+=======
+﻿@model List<OBS_Projesi.Models.Derslik>
+
+@{
+    ViewData["Title"] = "Derslik Yönetimi";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Derslik Yönetimi</h2>
+            <p class="text-muted mb-0">
+                Sınavlarda kullanılacak derslikleri kapasite, tip ve aktiflik durumuna göre yönetin.
+            </p>
+        </div>
+
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Derslik" asp-action="Ekle" class="btn btn-primary px-4">
+                + Yeni Derslik
+            </a>
+        }
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Toplam Derslik</p>
+                    <h3 class="fw-bold mb-0">@Model.Count</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Aktif Derslik</p>
+                    <h3 class="fw-bold mb-0">@Model.Count(x => x.Aktif)</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Aktif Toplam Kapasite</p>
+                    <h3 class="fw-bold mb-0">@Model.Where(x => x.Aktif).Sum(x => x.Kapasite)</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <h5 class="fw-bold mb-0">Derslik Listesi</h5>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Derslik</th>
+                            <th>Tip</th>
+                            <th>Kat</th>
+                            <th>Kapasite</th>
+                            <th>Durum</th>
+                            <th class="text-end pe-4">İşlemler</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-semibold">
+                                        @item.Ad
+                                    </td>
+
+                                    <td>
+                                        @item.Tip
+                                    </td>
+
+                                    <td>
+                                        @item.Kat
+                                    </td>
+
+                                    <td>
+                                        @item.Kapasite
+                                    </td>
+
+                                    <td>
+                                        @if (item.Aktif)
+                                        {
+                                            <span class="badge bg-success">Aktif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Pasif</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-end pe-4">
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <a asp-controller="Derslik"
+                                               asp-action="Duzenle"
+                                               asp-route-id="@item.DerslikID"
+                                               class="btn btn-sm btn-outline-primary me-2">
+                                                Düzenle
+                                            </a>
+
+                                            if (item.Aktif)
+                                            {
+                                                <form asp-controller="Derslik"
+                                                      asp-action="PasifYap"
+                                                      asp-route-id="@item.DerslikID"
+                                                      method="post"
+                                                      class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        Pasif Yap
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-controller="Derslik"
+                                                      asp-action="AktifYap"
+                                                      asp-route-id="@item.DerslikID"
+                                                      method="post"
+                                                      class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                                        Aktif Yap
+                                                    </button>
+                                                </form>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Sadece görüntüleme</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    Henüz derslik eklenmemiş.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+>>>>>>> 6e0fdc6 (Sınav yönetimi ve temel CRUD ekranları geliştirildi)

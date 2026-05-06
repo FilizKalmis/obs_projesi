@@ -1,8 +1,532 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<OBS_Projesi.Models.Sinav>
+
+@{
+    ViewData["Title"] = "Yönetim Paneli";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="dashboard-page">
+
+    <section class="dashboard-hero">
+        <div>
+            <p class="dashboard-eyebrow">OBS Sınav Planlama Sistemi</p>
+            <h1>Yönetim Paneli</h1>
+            <p>
+                Derslik, ders, sınav ve gözetmen süreçlerini tek panelden takip edin.
+            </p>
+        </div>
+
+        <div class="dashboard-user-card">
+            <span>Aktif Kullanıcı</span>
+            <strong>@User.Identity?.Name</strong>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <small class="role-badge admin">Admin</small>
+            }
+            else
+            {
+                <small class="role-badge viewer">Viewer</small>
+            }
+        </div>
+    </section>
+
+    <section class="stats-grid">
+        <div class="stat-card">
+            <span>Toplam Derslik</span>
+            <strong>@ViewBag.ToplamDerslik</strong>
+            <small>Tanımlı mekan sayısı</small>
+        </div>
+
+        <div class="stat-card">
+            <span>Aktif Derslik</span>
+            <strong>@ViewBag.AktifDerslik</strong>
+            <small>Kullanılabilir derslik</small>
+        </div>
+
+        <div class="stat-card">
+            <span>Toplam Kapasite</span>
+            <strong>@ViewBag.AktifToplamKapasite</strong>
+            <small>Aktif derslik kapasitesi</small>
+        </div>
+
+        <div class="stat-card">
+            <span>Toplam Ders</span>
+            <strong>@ViewBag.ToplamDers</strong>
+            <small>Sistemde kayıtlı ders</small>
+        </div>
+
+        <div class="stat-card">
+            <span>Toplam Sınav</span>
+            <strong>@ViewBag.ToplamSinav</strong>
+            <small>Planlanan sınav</small>
+        </div>
+
+        <div class="stat-card">
+            <span>Personel</span>
+            <strong>@ViewBag.ToplamPersonel</strong>
+            <small>Gözetmen havuzu</small>
+        </div>
+    </section>
+
+    <section class="dashboard-grid">
+
+        <div class="panel-card">
+            <div class="panel-header">
+                <div>
+                    <h2>Hızlı İşlemler</h2>
+                    <p>En sık kullanılan yönetim ekranlarına hızlı erişim.</p>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <a asp-controller="Derslik" asp-action="Index" class="quick-action">
+                    <span class="quick-icon">🏫</span>
+                    <div>
+                        <strong>Derslik Yönetimi</strong>
+                        <small>Kapasite, kat ve aktiflik bilgileri</small>
+                    </div>
+                </a>
+
+                <a asp-controller="Ders" asp-action="Index" class="quick-action">
+                    <span class="quick-icon">📚</span>
+                    <div>
+                        <strong>Ders Yönetimi</strong>
+                        <small>Ders kodu, yarıyıl ve kontenjan</small>
+                    </div>
+                </a>
+
+                <a asp-controller="Oturum" asp-action="Index" class="quick-action">
+                    <span class="quick-icon">🕘</span>
+                    <div>
+                        <strong>Oturum Yönetimi</strong>
+                        <small>Sınav saat aralıklarını tanımla</small>
+                    </div>
+                </a>
+
+                <a asp-controller="Sinav" asp-action="Index" class="quick-action">
+                    <span class="quick-icon">🗓️</span>
+                    <div>
+                        <strong>Sınav Planlama</strong>
+                        <small>Sınav tarihi, oturum ve salon atama</small>
+                    </div>
+                </a>
+
+                <a asp-controller="GozetmenAtama" asp-action="Index" class="quick-action">
+                    <span class="quick-icon">👥</span>
+                    <div>
+                        <strong>Gözetmen Atama</strong>
+                        <small>Personel uygunluğu ve görev yükü</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-header">
+                <div>
+                    <h2>Yaklaşan Sınavlar</h2>
+                    <p>En yakın 5 sınav kaydı.</p>
+                </div>
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                <div class="exam-list">
+                    @foreach (var sinav in Model)
+                    {
+                        <div class="exam-item">
+                            <div>
+                                <strong>@sinav.Ders?.DersAdi</strong>
+                                <small>@sinav.Oturum?.Tanim</small>
+                            </div>
+                            <span>@sinav.Tarih.ToString("dd.MM.yyyy")</span>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <strong>Henüz yaklaşan sınav yok.</strong>
+                    <p>Sınav planlama modülü tamamlandığında burada listelenecek.</p>
+                </div>
+            }
+        </div>
+
+    </section>
+
+    <section class="panel-card mt-4">
+        <div class="panel-header">
+            <div>
+                <h2>Sistem Modülleri</h2>
+                <p>Projenin ana işlevlerine göre modül durumu.</p>
+            </div>
+        </div>
+
+        <div class="module-grid">
+            <div class="module-card done">
+                <span class="status-icon">✓</span>
+                <strong>Kimlik Doğrulama</strong>
+                <small>Login, register ve rol kontrolü çalışıyor.</small>
+            </div>
+
+            <div class="module-card active">
+                <span class="status-icon">●</span>
+                <strong>Derslik Yönetimi</strong>
+                <small>Veritabanına bağlı ekleme, listeleme ve pasifleştirme.</small>
+            </div>
+
+            <div class="module-card pending">
+                <span class="status-icon">○</span>
+                <strong>Ders Yönetimi</strong>
+                <small>Ders, bölüm, yarıyıl ve kontenjan işlemleri.</small>
+            </div>
+
+            <div class="module-card active">
+                <span class="status-icon">●</span>
+                <strong>Sınav Atama</strong>
+                <small>Derslik kapasitesi ve oturum kontrolü.</small>
+            </div>
+        </div>
+    </section>
+
 </div>
+
+<style>
+    :root {
+        --primary: #2563eb;
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+    }
+
+    .dashboard-page {
+        padding: 2rem;
+        background-color: var(--bg-color);
+        min-height: 100vh;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .dashboard-hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        color: white;
+        border-radius: 1rem;
+    }
+
+    .dashboard-eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.75rem;
+        font-weight: 600;
+        opacity: 0.8;
+    }
+
+    .dashboard-hero h1 {
+        margin: 0.25rem 0 0.5rem;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .dashboard-hero p {
+        margin: 0;
+    }
+
+    .dashboard-user-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        backdrop-filter: blur(10px);
+        text-align: right;
+        min-width: 190px;
+    }
+
+    .dashboard-user-card span {
+        display: block;
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .dashboard-user-card strong {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 1rem;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+    }
+
+    .role-badge.admin {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .role-badge.viewer {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .stat-card span {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+
+    .stat-card strong {
+        display: block;
+        font-size: 1.5rem;
+        color: var(--text-main);
+        margin: 0.25rem 0;
+    }
+
+    .stat-card small {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 2rem;
+    }
+
+    .panel-card {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .panel-header h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-main);
+    }
+
+    .panel-header p {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin: 0.25rem 0 0;
+    }
+
+    .quick-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 0.25rem;
+    }
+
+    .quick-action {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 0.5rem;
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .quick-action:hover {
+        background: #f1f5f9;
+        transform: translateX(4px);
+    }
+
+    .quick-icon {
+        font-size: 1.5rem;
+        margin-right: 1.5rem;
+        width: 40px;
+        text-align: center;
+    }
+
+    .quick-action strong {
+        display: block;
+        font-size: 1rem;
+        color: var(--text-main);
+    }
+
+    .quick-action small {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .disabled-action {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .disabled-action:hover {
+        background: transparent;
+        transform: none;
+    }
+
+    .exam-list {
+        padding: 1rem;
+    }
+
+    .exam-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+        gap: 1rem;
+    }
+
+    .exam-item:last-child {
+        border: none;
+    }
+
+    .exam-item strong {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--text-main);
+    }
+
+    .exam-item small {
+        color: var(--text-muted);
+    }
+
+    .exam-item span {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    .module-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+
+    .module-card {
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .module-card strong {
+        display: block;
+        margin-top: 0.25rem;
+        color: var(--text-main);
+    }
+
+    .module-card small {
+        display: block;
+        margin-top: 0.35rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    .module-card.done {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .module-card.active {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+    }
+
+    .module-card.pending {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        opacity: 0.7;
+    }
+
+    .status-icon {
+        margin-right: 0.5rem;
+        font-weight: bold;
+    }
+
+    .empty-state {
+        padding: 3rem 1.5rem;
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    .empty-state strong {
+        display: block;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        margin: 0;
+    }
+
+    @@media (max-width: 992px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-hero {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .dashboard-user-card {
+            margin-top: 1.5rem;
+            text-align: center;
+            width: 100%;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .dashboard-page {
+            padding: 1rem;
+        }
+
+        .dashboard-hero {
+            padding: 1.5rem;
+        }
+
+        .dashboard-hero h1 {
+            font-size: 1.5rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .quick-action {
+            align-items: flex-start;
+        }
+
+        .quick-icon {
+            margin-right: 1rem;
+        }
+    }
+</style>

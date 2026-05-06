@@ -4,6 +4,7 @@
     ViewData["Title"] = "Yeni Derslik Ekle";
 }
 
+<<<<<<< HEAD
 <h2>Yeni Derslik Tanımla</h2>
 
 <div class="row">
@@ -52,3 +53,93 @@
         </form>
     </div>
 </div>
+=======
+<div class="container-fluid px-4 py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Yeni Derslik Ekle</h2>
+        <p class="text-muted mb-0">
+            Sınavlarda kullanılacak yeni derslik bilgisini sisteme ekleyin.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+
+            <form asp-controller="Derslik" asp-action="Ekle" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="Ad" class="form-label fw-semibold"></label>
+                        <input asp-for="Ad"
+                               class="form-control"
+                               placeholder="Örn: Amfi-1, Z-04, Lab-2" />
+                        <span asp-validation-for="Ad" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Kapasite" class="form-label fw-semibold"></label>
+                        <input asp-for="Kapasite"
+                               type="number"
+                               class="form-control"
+                               placeholder="Örn: 70" />
+                        <span asp-validation-for="Kapasite" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Tip" class="form-label fw-semibold">Derslik Tipi</label>
+                        <select asp-for="Tip" class="form-select">
+                            <option value="">Seçiniz</option>
+                            <option value="Amfi">Büyük Amfi</option>
+                            <option value="Sınıf">Sınıf</option>
+                            <option value="Lab">Laboratuvar</option>
+                        </select>
+                        <span asp-validation-for="Tip" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Kat" class="form-label fw-semibold"></label>
+                        <input asp-for="Kat"
+                               class="form-control"
+                               placeholder="Örn: Zemin, 1, 2" />
+                        <span asp-validation-for="Kat" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check form-switch mt-2">
+                            <input asp-for="Aktif" class="form-check-input" />
+                            <label asp-for="Aktif" class="form-check-label">
+                                Derslik aktif olarak kullanılsın
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary px-4">
+                        Kaydet
+                    </button>
+
+                    <a asp-controller="Derslik" asp-action="Index" class="btn btn-outline-secondary px-4">
+                        İptal
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+>>>>>>> 6e0fdc6 (Sınav yönetimi ve temel CRUD ekranları geliştirildi)
