@@ -1,5 +1,4 @@
-﻿namespace OBS_Projesi.Views.Derslik
-@model OBS_Projesi.Models.Derslik
+﻿@model OBS_Projesi.Models.Derslik
 
 @{
     ViewData["Title"] = "Yeni Derslik Ekle";
@@ -10,7 +9,8 @@
 <div class="row">
     <div class="col-md-6 shadow-sm p-4 bg-white rounded">
         <form asp-action="Ekle" method="post">
-            <!-- Formun içine gizli bir güvenlik token'ı yerleştirir -->
+            @Html.AntiForgeryToken()
+
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="mb-3">
@@ -28,10 +28,23 @@
             <div class="mb-3">
                 <label asp-for="Tip" class="form-label"></label>
                 <select asp-for="Tip" class="form-select">
+                    <option value="">Seçiniz</option>
                     <option value="Amfi">Büyük Amfi</option>
                     <option value="Sınıf">Sınıf</option>
                     <option value="Lab">Laboratuvar</option>
                 </select>
+                <span asp-validation-for="Tip" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Kat" class="form-label"></label>
+                <input asp-for="Kat" class="form-control" placeholder="Örn: Zemin, 1. Kat" />
+                <span asp-validation-for="Kat" class="text-danger"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="Aktif" class="form-check-input" checked />
+                <label asp-for="Aktif" class="form-check-label">Aktif</label>
             </div>
 
             <button type="submit" class="btn btn-primary">Kaydet</button>

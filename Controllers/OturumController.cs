@@ -7,19 +7,22 @@ using OBS_Projesi.Models;
 namespace OBS_Projesi.Controllers
 {
     [Authorize]
-    public class DerslikController : Controller
+    public class OturumController : Controller
     {
         private readonly AppDbContext _context;
 
-        public DerslikController(AppDbContext context)
+        public OturumController(AppDbContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var derslikler = await _context.Derslikler.ToListAsync();
-            return View(derslikler);
+            var oturumlar = await _context.Oturumlar
+                .OrderBy(o => o.BaslangicSaat)
+                .ToListAsync();
+
+            return View(oturumlar);
         }
 
         [Authorize(Roles = "Admin")]
@@ -31,11 +34,9 @@ namespace OBS_Projesi.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Ekle([Bind("Ad,Kapasite,Tip,Kat,Aktif")] Derslik derslik)
+        public async Task<IActionResult> Ekle([Bind("Tanim,BaslangicSaat,BitisSaat")] Oturum oturum)
         {
-            derslik.Aktif = true;
-
-            _context.Derslikler.Add(derslik);
+            _context.Oturumlar.Add(oturum);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));

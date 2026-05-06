@@ -1,0 +1,44 @@
+﻿@model IEnumerable<OBS_Projesi.Models.Ders>
+
+@{
+    ViewData["Title"] = "Ders Listesi";
+}
+
+<h2>Ders Listesi</h2>
+
+<a asp-action="Ekle" class="btn btn-primary mb-3">Yeni Ders Ekle</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Ders Kodu</th>
+            <th>Ders Adı</th>
+            <th>Ders Türü</th>
+            <th>Öğrenci Sayısı</th>
+            <th>Yarıyıl</th>
+            <th>Bölüm</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var ders in Model)
+            {
+                <tr>
+                    <td>@ders.DersKodu</td>
+                    <td>@ders.DersAdi</td>
+                    <td>@ders.DersTuru</td>
+                    <td>@ders.OgrenciSayisi</td>
+                    <td>@ders.Yariyil</td>
+                    <td>@ders.Bolum?.BolumAdi</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">Henüz ders eklenmemiş.</td>
+            </tr>
+        }
+    </tbody>
+</table>

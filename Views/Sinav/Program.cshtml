@@ -6,7 +6,9 @@
 
 <h2>Sınav Programı</h2>
 
-<a asp-action="Olustur" class="btn btn-primary mb-3">Yeni Sınav / Salon Ata</a>
+<a asp-action="Olustur" class="btn btn-primary mb-3">
+    Yeni Sınav / Salon Ata
+</a>
 
 <table class="table table-bordered table-striped">
     <thead>
@@ -17,6 +19,7 @@
             <th>Salonlar</th>
         </tr>
     </thead>
+
     <tbody>
         @if (Model != null && Model.Any())
         {
@@ -27,7 +30,14 @@
                     <td>@sinav.Tarih.ToShortDateString()</td>
                     <td>@sinav.Oturum?.Tanim</td>
                     <td>
-                        @string.Join(", ", sinav.SinavSalonlari.Select(ss => ss.Derslik.Ad))
+                        @if (sinav.SinavSalonlari != null && sinav.SinavSalonlari.Any())
+                        {
+                            @string.Join(", ", sinav.SinavSalonlari.Select(ss => ss.Derslik?.Ad))
+                        }
+                        else
+                        {
+                            <span>Salon atanmamış</span>
+                        }
                     </td>
                 </tr>
             }
@@ -35,7 +45,9 @@
         else
         {
             <tr>
-                <td colspan="4" class="text-center">Henüz sınav oluşturulmamış.</td>
+                <td colspan="4" class="text-center">
+                    Henüz sınav oluşturulmamış.
+                </td>
             </tr>
         }
     </tbody>

@@ -1,0 +1,42 @@
+﻿@model IEnumerable<OBS_Projesi.Models.Derslik>
+
+@{
+    ViewData["Title"] = "Derslik Listesi";
+}
+
+<h2>Derslik Listesi</h2>
+
+<a asp-action="Ekle" class="btn btn-primary mb-3">Yeni Derslik Ekle</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Derslik Adı</th>
+            <th>Kapasite</th>
+            <th>Tip</th>
+            <th>Kat</th>
+            <th>Durum</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var derslik in Model)
+            {
+                <tr>
+                    <td>@derslik.Ad</td>
+                    <td>@derslik.Kapasite</td>
+                    <td>@derslik.Tip</td>
+                    <td>@derslik.Kat</td>
+                    <td>@(derslik.Aktif ? "Aktif" : "Pasif")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center">Henüz derslik eklenmemiş.</td>
+            </tr>
+        }
+    </tbody>
+</table>

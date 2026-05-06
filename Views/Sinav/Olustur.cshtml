@@ -1,0 +1,46 @@
+﻿@model OBS_Projesi.Models.Sinav
+
+@{
+    ViewData["Title"] = "Yeni Sınav Oluştur";
+}
+
+<h2>Yeni Sınav / Salon Ata</h2>
+
+<div class="row">
+    <div class="col-md-6 shadow-sm p-4 bg-white rounded">
+
+        <form asp-action="Olustur" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label class="form-label">Ders</label>
+                <select asp-for="DersID" asp-items="ViewBag.Dersler" class="form-select">
+                    <option value="">Ders Seçiniz</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Sınav Tarihi</label>
+                <input asp-for="Tarih" type="date" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Oturum</label>
+                <select asp-for="OturumID" asp-items="ViewBag.Oturumlar" class="form-select">
+                    <option value="">Oturum Seçiniz</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Sınav Oluştur ve Salon Ata
+            </button>
+
+            <a asp-action="Program" class="btn btn-secondary">
+                İptal
+            </a>
+        </form>
+
+    </div>
+</div>

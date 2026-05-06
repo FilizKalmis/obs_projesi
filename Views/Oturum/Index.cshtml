@@ -1,0 +1,40 @@
+﻿@model IEnumerable<OBS_Projesi.Models.Oturum>
+
+@{
+    ViewData["Title"] = "Oturum Listesi";
+}
+
+<h2>Oturum Listesi</h2>
+
+<a asp-action="Ekle" class="btn btn-primary mb-3">Yeni Oturum Ekle</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Tanım</th>
+            <th>Başlangıç Saati</th>
+            <th>Bitiş Saati</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var oturum in Model)
+            {
+                <tr>
+                    <td>@oturum.Tanim</td>
+                    <td>@oturum.BaslangicSaat</td>
+                    <td>@oturum.BitisSaat</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center">
+                    Henüz oturum eklenmemiş.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

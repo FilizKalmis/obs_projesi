@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using OBS_Projesi.Models;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OBS_Projesi.Data
 {
@@ -10,7 +9,7 @@ namespace OBS_Projesi.Data
             : base(options)
         {
         }
-       
+
         public DbSet<Bolum> Bolumler { get; set; }
         public DbSet<Ders> Dersler { get; set; }
         public DbSet<Oturum> Oturumlar { get; set; }
@@ -27,27 +26,33 @@ namespace OBS_Projesi.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // EF Core'a SinavSalonu tablosunda trigger olduðunu söylüyoruz.
+            // Aksi halde SQL Server "OUTPUT clause + trigger" hatasý veriyor.
+            modelBuilder.Entity<SinavSalonu>()
+                .ToTable("SinavSalonu", tb => tb.HasTrigger("trg_SalonCakismaEngelle"));
+
             // SinavLog ile Sinav arasýndaki silme döngüsünü kýrýyoruz
             modelBuilder.Entity<SinavLog>()
                 .HasOne(l => l.Sinav)
                 .WithMany()
                 .HasForeignKey(l => l.SinavID)
-                .OnDelete(DeleteBehavior.NoAction); // Döngüyü engellemek için NoAction yaptýk
+                .OnDelete(DeleteBehavior.NoAction);
 
-            // SinavLog ile Personel arasýndaki silme döngüsünü de garantiye alalým
+            // SinavLog ile Personel arasýndaki silme döngüsünü kýrýyoruz
             modelBuilder.Entity<SinavLog>()
                 .HasOne(l => l.DegistirenPersonel)
                 .WithMany()
                 .HasForeignKey(l => l.PersonelID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // GozetmenAtama silme döngüsünü kýrýyoruz
+            // GozetmenAtama ile SinavSalonu arasýndaki silme döngüsünü kýrýyoruz
             modelBuilder.Entity<GozetmenAtama>()
                 .HasOne(ga => ga.SinavSalonu)
-                .WithMany(ss => ss.GozetmenAtamalari) // Ýliþki tanýmý
+                .WithMany(ss => ss.GozetmenAtamalari)
                 .HasForeignKey(ga => ga.SinavSalonuID)
-                .OnDelete(DeleteBehavior.NoAction); // Döngü hatasýný bu satýr çözer[cite: 1]
+                .OnDelete(DeleteBehavior.NoAction);
 
+            // GozetmenAtama ile Personel arasýndaki silme döngüsünü kýrýyoruz
             modelBuilder.Entity<GozetmenAtama>()
                 .HasOne(ga => ga.Personel)
                 .WithMany()
