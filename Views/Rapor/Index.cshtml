@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Raporlar";
+}
+
+<div class="page-header">
+    <div>
+        <h2>Raporlar</h2>
+        <p>SQL View'ler üzerinden oluşturulan sınav, derslik ve gözetmen raporları.</p>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <a asp-controller="Rapor" asp-action="SinavProgrami" class="report-card-link">
+        <div class="stat-card report-card">
+            <span>View</span>
+            <h3>Sınav Programı Detayı</h3>
+            <p>vw_SinavProgramiDetay</p>
+        </div>
+    </a>
+
+    <a asp-controller="Rapor" asp-action="DerslikDurumu" class="report-card-link">
+        <div class="stat-card report-card">
+            <span>View</span>
+            <h3>Derslik Durumu</h3>
+            <p>vw_DerslikDurumu</p>
+        </div>
+    </a>
+
+    <a asp-controller="Rapor" asp-action="GozetmenGorevYuku" class="report-card-link">
+        <div class="stat-card report-card">
+            <span>View</span>
+            <h3>Gözetmen Görev Yükü</h3>
+            <p>vw_GozetmenGorevYuku</p>
+        </div>
+    </a>
+</div>

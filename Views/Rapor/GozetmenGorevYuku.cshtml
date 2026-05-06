@@ -1,0 +1,58 @@
+﻿@model List<OBS_Projesi.Models.ViewModels.GozetmenGorevYukuRaporViewModel>
+
+@{
+    ViewData["Title"] = "Gözetmen Görev Yükü Raporu";
+}
+
+<div class="page-header">
+    <div>
+        <h2>Gözetmen Görev Yükü Raporu</h2>
+        <p>Bu ekran veriyi doğrudan <strong>vw_GozetmenGorevYuku</strong> SQL View'inden okur.</p>
+    </div>
+
+    <a asp-controller="Rapor" asp-action="Index" class="btn btn-secondary">
+        Raporlara Dön
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Personel Görev Yükleri</h5>
+        <span class="viewer-badge">@Model.Count personel</span>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>Unvan</th>
+                        <th>Ad</th>
+                        <th>Soyad</th>
+                        <th>Görev Sayısı</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Unvan</td>
+                            <td>@item.Ad</td>
+                            <td>@item.Soyad</td>
+                            <td>
+                                <span class="viewer-badge">@item.GorevSayisi görev</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            Rapor kaydı bulunamadı.
+        </div>
+    }
+</div>

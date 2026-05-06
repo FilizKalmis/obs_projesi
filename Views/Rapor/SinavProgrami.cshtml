@@ -1,0 +1,62 @@
+﻿@model List<OBS_Projesi.Models.ViewModels.SinavProgramiDetayRaporViewModel>
+
+@{
+    ViewData["Title"] = "Sınav Programı Detay Raporu";
+}
+
+<div class="page-header">
+    <div>
+        <h2>Sınav Programı Detay Raporu</h2>
+        <p>Bu ekran veriyi doğrudan <strong>vw_SinavProgramiDetay</strong> SQL View'inden okur.</p>
+    </div>
+
+    <a asp-controller="Rapor" asp-action="Index" class="btn btn-secondary">
+        Raporlara Dön
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Sınav Programı Detayı</h5>
+        <span class="viewer-badge">@Model.Count kayıt</span>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>Tarih</th>
+                        <th>Oturum</th>
+                        <th>Ders</th>
+                        <th>Salon</th>
+                        <th>Gözetmen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @(item.Tarih.HasValue ? item.Tarih.Value.ToString("dd.MM.yyyy") : "-")
+                            </td>
+                            <td>@item.Oturum</td>
+                            <td>@item.DersAdi</td>
+                            <td>
+                                <span class="salon-badge">@item.Salon</span>
+                            </td>
+                            <td>@item.Gozetmen</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            Rapor kaydı bulunamadı.
+        </div>
+    }
+</div>
