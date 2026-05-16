@@ -2,32 +2,36 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace OBS_Projesi.Models
 {
     [Table("Sinav")]
     public class Sinav
     {
-        // Birincil anahtar
         [Key]
         public int SinavID { get; set; }
 
-        // Foreign Key: Bu sınav hangi derse ait?
+        [Required(ErrorMessage = "Ders seçimi zorunludur.")]
+        [Display(Name = "Ders")]
         public int DersID { get; set; }
 
-        // Sınavın yapılacağı tarih
+        [Required(ErrorMessage = "Sınav tarihi zorunludur.")]
+        [DataType(DataType.Date)]
+        [Display(Name = "Sınav Tarihi")]
         public DateTime Tarih { get; set; }
 
-        // Foreign Key: Bu sınav hangi oturumda yapılacak?
+        [Required(ErrorMessage = "Oturum seçimi zorunludur.")]
+        [Display(Name = "Oturum")]
         public int OturumID { get; set; }
 
-        // Navigation Property: Sınavın bağlı olduğu ders
-        public Ders Ders { get; set; }
+        [ValidateNever]
+        public Ders Ders { get; set; } = null!;
 
-        // Navigation Property: Sınavın yapılacağı oturum
-        public Oturum Oturum { get; set; }
+        [ValidateNever]
+        public Oturum Oturum { get; set; } = null!;
 
-        // Bir sınav birden fazla salonda yapılabilir
-        public ICollection<SinavSalonu> SinavSalonlari { get; set; }
+        [ValidateNever]
+        public ICollection<SinavSalonu> SinavSalonlari { get; set; } = new List<SinavSalonu>();
     }
 }

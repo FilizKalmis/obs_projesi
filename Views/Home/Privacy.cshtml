@@ -1,6 +1,42 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
-}
-<h1>@ViewData["Title"]</h1>
+﻿@model IEnumerable<OBS_Projesi.Models.Sinav>
 
-<p>Use this page to detail your site's privacy policy.</p>
+@{
+    ViewData["Title"] = "Sınav Programı";
+}
+
+<h2>Sınav Programı</h2>
+
+<a asp-action="Olustur" class="btn btn-primary mb-3">Yeni Sınav / Salon Ata</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Ders</th>
+            <th>Tarih</th>
+            <th>Oturum</th>
+            <th>Salonlar</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var sinav in Model)
+            {
+                <tr>
+                    <td>@sinav.Ders?.DersAdi</td>
+                    <td>@sinav.Tarih.ToShortDateString()</td>
+                    <td>@sinav.Oturum?.Tanim</td>
+                    <td>
+                        @string.Join(", ", sinav.SinavSalonlari.Select(ss => ss.Derslik.Ad))
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4" class="text-center">Henüz sınav oluşturulmamış.</td>
+            </tr>
+        }
+    </tbody>
+</table>

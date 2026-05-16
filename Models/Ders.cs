@@ -1,40 +1,50 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace OBS_Projesi.Models
 {
     [Table("Ders")]
     public class Ders
     {
-        // Birincil anahtar
         [Key]
-
         public int DersID { get; set; }
 
-        // Ders kodu: Örn. YZM 2126
-        public string DersKodu { get; set; }
+        [Required(ErrorMessage = "Ders kodu zorunludur.")]
+        [StringLength(20)]
+        [Display(Name = "Ders Kodu")]
+        public string DersKodu { get; set; } = string.Empty;
 
-        // Ders türü: Zorunlu / Seçmeli
-        public string DersTuru { get; set; }
+        [Required(ErrorMessage = "Ders adı zorunludur.")]
+        [StringLength(100)]
+        [Display(Name = "Ders Adı")]
+        public string DersAdi { get; set; } = string.Empty;
 
-        // Ders adı: Örn. Veritabanı Sistemlerine Giriş
-        public string DersAdi { get; set; }
+        [Required(ErrorMessage = "Ders türü zorunludur.")]
+        [StringLength(30)]
+        [Display(Name = "Ders Türü")]
+        public string DersTuru { get; set; } = string.Empty;
 
-        // Dersi alan öğrenci sayısı
+        [Required(ErrorMessage = "Öğrenci sayısı zorunludur.")]
+        [Range(1, 500, ErrorMessage = "Öğrenci sayısı 1-500 arasında olmalıdır.")]
+        [Display(Name = "Öğrenci Sayısı")]
         public int OgrenciSayisi { get; set; }
 
-        // Dersin ait olduğu yarıyıl: 1, 2, 3...
-        // Aynı yarıyıldaki zorunlu dersler aynı oturuma konulmamalı
+        [Required(ErrorMessage = "Yarıyıl bilgisi zorunludur.")]
+        [Range(1, 8, ErrorMessage = "Yarıyıl 1-8 arasında olmalıdır.")]
+        [Display(Name = "Yarıyıl")]
         public int Yariyil { get; set; }
 
-        // Foreign Key: Bu ders hangi bölüme ait?
+        [Required(ErrorMessage = "Bölüm seçimi zorunludur.")]
+        [Display(Name = "Bölüm")]
         public int BolumID { get; set; }
 
-        // Navigation Property: Dersin bağlı olduğu bölüm
-        public Bolum Bolum { get; set; }
+        [ValidateNever]
+        [ForeignKey("BolumID")]
+        public Bolum Bolum { get; set; } = null!;
 
-        // Bir dersin birden fazla sınavı olabilir
-        public ICollection<Sinav> Sinavlar { get; set; }
+        [ValidateNever]
+        public ICollection<Sinav> Sinavlar { get; set; } = new List<Sinav>();
     }
 }

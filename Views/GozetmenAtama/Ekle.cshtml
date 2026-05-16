@@ -1,0 +1,135 @@
+﻿@model OBS_Projesi.Models.GozetmenAtama
+
+@{
+    ViewData["Title"] = "Yeni Gözetmen Ataması";
+}
+
+<div class="page-header">
+    <div>
+        <h2>Yeni Gözetmen Ataması</h2>
+        <p>Seçilen sınav salonuna uygun gözetmen atayın.</p>
+    </div>
+
+    <a asp-controller="GozetmenAtama" asp-action="Index" class="btn btn-secondary">
+        Geri Dön
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">
+        <h5>Gözetmen Atama Bilgileri</h5>
+    </div>
+
+    <div class="card-body">
+        <form asp-controller="GozetmenAtama" asp-action="Ekle" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label>Sınav Salonu</label>
+                <select asp-for="SinavSalonuID"
+                        id="sinavSalonuSelect"
+                        class="form-control"
+                        asp-items="ViewBag.SinavSalonlari">
+                    <option value="">Sınav salonu seçiniz</option>
+                </select>
+                <span asp-validation-for="SinavSalonuID" class="text-danger"></span>
+            </div>
+
+            @if (ViewBag.OrtakHavuzAktif == true)
+            {
+                <div class="pool-info-card">
+                    <div>
+                        <h4>Ortak Havuz Sistemi Aktif</h4>
+                        <p>
+                            Bu sınav için önce <strong>@ViewBag.SeciliBolumAdi</strong> bölümündeki gözetmenler listelenir.
+                            Gerekirse diğer bölümlerden uygun gözetmenler de seçilebilir.
+                        </p>
+                    </div>
+
+                    <span class="pool-badge">Aktif</span>
+                </div>
+            }
+            else
+            {
+                <div class="pool-info-card passive">
+                    <div>
+                        <h4>Gözetmen Listesi</h4>
+                        <p>
+                            Sınav salonu seçtiğinizde ilgili bölüm ve ortak havuz bilgisi burada görünecek.
+                        </p>
+                    </div>
+
+                    <span class="pool-badge passive">Bekliyor</span>
+                </div>
+            }
+
+            <div class="form-group">
+                <label>Gözetmen</label>
+                <select asp-for="PersonelID"
+                        class="form-control"
+                        asp-items="ViewBag.Personeller">
+                    <option value="">Gözetmen seçiniz</option>
+                </select>
+                <span asp-validation-for="PersonelID" class="text-danger"></span>
+            </div>
+
+            <div class="info-box">
+                Aynı anda başka salonda görevli olan, izinli olan veya arka arkaya görev sınırını aşan gözetmenler atanamaz.
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Atama Yap
+                </button>
+
+                <a asp-controller="GozetmenAtama" asp-action="Index" class="btn btn-secondary">
+                    İptal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const sinavSalonuSelect = document.getElementById("sinavSalonuSelect");
+
+        if (sinavSalonuSelect) {
+            sinavSalonuSelect.addEventListener("change", function () {
+                const selectedValue = this.value;
+
+                if (selectedValue) {
+                    window.location.href = "/GozetmenAtama/Ekle?sinavSalonuID=" + selectedValue;
+                }
+            });
+        }
+    </script>
+}

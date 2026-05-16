@@ -7,18 +7,19 @@ namespace OBS_Projesi.Models
     public class SinavSalonu
     {
         [Key]
-        public int SinavSalonuID { get; set; } // Diyagrama göre PK
+        public int SinavSalonuID { get; set; }
 
         public int SinavID { get; set; }
+
         public int DerslikID { get; set; }
 
         [ForeignKey("SinavID")]
-        public virtual Sinav Sinav { get; set; }
+        public virtual Sinav? Sinav { get; set; }
 
         [ForeignKey("DerslikID")]
-        public virtual Derslik Derslik { get; set; }
+        public virtual Derslik? Derslik { get; set; }
 
-        // Bu salon atamasına yapılacak gözetmen atamaları için ilişki
         public virtual ICollection<GozetmenAtama> GozetmenAtamalari { get; set; }
+            = new List<GozetmenAtama>();
     }
 }

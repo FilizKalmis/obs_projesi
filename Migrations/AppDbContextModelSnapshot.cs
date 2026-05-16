@@ -52,15 +52,18 @@ namespace OBS_Projesi.Migrations
 
                     b.Property<string>("DersAdi")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("DersKodu")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("DersTuru")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<int>("OgrenciSayisi")
                         .HasColumnType("int");
@@ -96,7 +99,8 @@ namespace OBS_Projesi.Migrations
 
                     b.Property<string>("Kat")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Tip")
                         .IsRequired()
@@ -143,7 +147,7 @@ namespace OBS_Projesi.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("PersonelID")
+                    b.Property<int?>("PersonelID")
                         .HasColumnType("int");
 
                     b.Property<string>("Rol")
@@ -179,7 +183,8 @@ namespace OBS_Projesi.Migrations
 
                     b.Property<string>("Tanim")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("OturumID");
 
@@ -339,7 +344,12 @@ namespace OBS_Projesi.Migrations
 
                     b.HasIndex("SinavID");
 
-                    b.ToTable("SinavSalonu");
+                    b.ToTable("SinavSalonu", null, t =>
+                        {
+                            t.HasTrigger("trg_SalonCakismaEngelle");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
             modelBuilder.Entity("OBS_Projesi.Models.Ders", b =>
@@ -376,9 +386,7 @@ namespace OBS_Projesi.Migrations
                 {
                     b.HasOne("OBS_Projesi.Models.Personel", "Personel")
                         .WithMany()
-                        .HasForeignKey("PersonelID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PersonelID");
 
                     b.Navigation("Personel");
                 });

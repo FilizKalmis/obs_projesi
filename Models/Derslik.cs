@@ -1,39 +1,37 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace OBS_Projesi.Models
 {
     [Table("Derslik")]
     public class Derslik
     {
-        // Birincil anahtar
         [Key]
-
         public int DerslikID { get; set; }
 
         [Required(ErrorMessage = "Derslik adı zorunludur.")]
-        [StringLength(50)] // XSS riskine karşı girdi uzunluğunu sınırlıyoruz
+        [StringLength(50)]
         [Display(Name = "Derslik Adı")]
+        public string Ad { get; set; } = string.Empty;
 
-        // Derslik adı: Amfi-1, Z-04, Lab-1 gibi
-        public string Ad { get; set; }
-
-        // Dersliğin öğrenci kapasitesi
+        [Required(ErrorMessage = "Kapasite zorunludur.")]
         [Range(1, 500, ErrorMessage = "Kapasite 1-500 arasında olmalıdır.")]
         public int Kapasite { get; set; }
 
-        // Derslik tipi: Amfi, Sınıf, Lab gibi
-        [Required]
-        public string Tip { get; set; }
+        [Required(ErrorMessage = "Derslik tipi zorunludur.")]
+        [Display(Name = "Derslik Tipi")]
+        public string Tip { get; set; } = string.Empty;
 
-        // Derslik aktif mi? Kullanım dışı salonları pasif yapmak için
         public bool Aktif { get; set; }
 
-        // Aynı katta salon seçimi için kullanılır: Zemin, 1, 2 gibi
-        public string Kat { get; set; }
+        [Required(ErrorMessage = "Kat bilgisi zorunludur.")]
+        [StringLength(20)]
+        [Display(Name = "Kat")]
+        public string Kat { get; set; } = string.Empty;
 
-        // Bir derslik farklı sınavlarda kullanılabilir
-        public ICollection<SinavSalonu> SinavSalonlari { get; set; }
+        [ValidateNever]
+        public ICollection<SinavSalonu> SinavSalonlari { get; set; } = new List<SinavSalonu>();
     }
 }

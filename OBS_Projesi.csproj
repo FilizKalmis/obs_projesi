@@ -7,15 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Derslik\Derslik.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\NewFolder\" />
+    <Folder Include="Views\NewFolder1\" />
+    <Folder Include="Views\NewFolder2\" />
+    <Folder Include="Views\NewFolder\" />
   </ItemGroup>
 
 </Project>
