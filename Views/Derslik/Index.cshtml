@@ -1,0 +1,252 @@
+@model List<OBS_Projesi.Models.Derslik>
+
+@{
+    ViewData["Title"] = "Derslik Yönetimi";
+
+    var derslikler = Model ?? new List<OBS_Projesi.Models.Derslik>();
+}
+
+<style>
+    .page-shell {
+        color: #ffffff;
+    }
+
+    .page-title {
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .page-subtitle {
+        color: #cbd5e1;
+    }
+
+    .stat-card {
+        background: #ffffff;
+        color: #111827;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,.18);
+    }
+
+        .stat-card .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .stat-number {
+            color: #111827;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+    .content-card {
+        background: #ffffff;
+        color: #111827;
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,.18);
+    }
+
+    .content-card-header {
+        background: #ffffff;
+        color: #111827;
+        padding: 22px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .content-card-header h5 {
+            color: #111827;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .content-card-header small {
+            color: #6b7280;
+        }
+
+    .custom-table {
+        background: #ffffff;
+        color: #111827;
+        margin-bottom: 0;
+    }
+
+        .custom-table thead th {
+            background: #f3f4f6;
+            color: #111827;
+            font-weight: 700;
+            border-bottom: 1px solid #d1d5db;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .custom-table tbody td {
+            background: #ffffff;
+            color: #111827;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
+
+        .custom-table tbody tr:hover td {
+            background: #f9fafb;
+        }
+
+    .empty-row {
+        color: #6b7280;
+        padding: 48px 0;
+    }
+</style>
+
+<div class="container-fluid px-4 py-4 page-shell">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title mb-1">Derslik Yönetimi</h2>
+            <p class="page-subtitle mb-0">
+                Sınavlarda kullanılacak derslikleri ve kapasitelerini yönetin.
+            </p>
+        </div>
+
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Derslik" asp-action="Ekle" class="btn btn-primary px-4">
+                + Yeni Derslik
+            </a>
+        }
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <p class="stat-label">Toplam Derslik</p>
+                    <h3 class="stat-number">@derslikler.Count</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <p class="stat-label">Aktif Derslik</p>
+                    <h3 class="stat-number">@derslikler.Count(x => x.Aktif)</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <p class="stat-label">Toplam Kapasite</p>
+                    <h3 class="stat-number">@derslikler.Sum(x => x.Kapasite)</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <div class="content-card-header">
+            <div>
+                <h5>Derslik Listesi</h5>
+                <small>Derslik adı, kapasite ve aktiflik durumu</small>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="Derslik" asp-action="Ekle" class="btn btn-sm btn-primary">
+                    + Yeni Derslik
+                </a>
+            }
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle custom-table">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Derslik Adı</th>
+                        <th>Kapasite</th>
+                        <th>Durum</th>
+                        <th class="text-end pe-4">İşlemler</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (derslikler.Any())
+                    {
+                        foreach (var derslik in derslikler)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-semibold">@derslik.Ad</td>
+                                <td>@derslik.Kapasite</td>
+                                <td>
+                                    @if (derslik.Aktif)
+                                    {
+                                        <span class="badge bg-success">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Pasif</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-controller="Derslik"
+                                           asp-action="Duzenle"
+                                           asp-route-id="@derslik.DerslikID"
+                                           class="btn btn-sm btn-outline-primary me-2">
+                                            Düzenle
+                                        </a>
+
+                                        <form asp-controller="Derslik"
+                                              asp-action="Sil"
+                                              asp-route-id="@derslik.DerslikID"
+                                              method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Bu dersliği silmek istediğinize emin misiniz?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                Sil
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Sadece görüntüleme</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center empty-row">
+                                Henüz derslik eklenmemiş.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,49 +1,406 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    string IsActive(string controller, string? action = null)
+    {
+        if (currentController == controller && (action == null || currentAction == action))
+        {
+            return "active";
+        }
+
+        return "";
+    }
+
+    var pageTitle = ViewData["Title"]?.ToString();
+
+    if (string.IsNullOrWhiteSpace(pageTitle))
+    {
+        pageTitle = "OBS Yönetim Paneli";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - OBS_Projesi</title>
+
+    <title>@pageTitle - OBS Sınav Sistemi</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/OBS_Projesi.styles.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --sidebar-bg: #111827;
+            --sidebar-border: #1f2937;
+            --main-bg: #111827;
+            --topbar-bg: #0d6efd;
+            --text-light: #f9fafb;
+            --text-muted-custom: #9ca3af;
+            --link-hover: #1f2937;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: var(--main-bg);
+            color: var(--text-light);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .app-shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--sidebar-border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            padding: 24px 18px;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 42px;
+            text-decoration: none;
+        }
+
+            .sidebar-brand:hover {
+                text-decoration: none;
+            }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #0d6efd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 20px;
+        }
+
+        .brand-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: var(--text-muted-custom);
+            margin: 0;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-link {
+            color: #e5e7eb;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+            .sidebar-link:hover {
+                background: var(--link-hover);
+                color: #ffffff;
+                text-decoration: none;
+            }
+
+            .sidebar-link.active {
+                background: #0d6efd;
+                color: #ffffff;
+                font-weight: 600;
+            }
+
+        .sidebar-icon {
+            width: 22px;
+            text-align: center;
+        }
+
+        .user-card {
+            background: #182130;
+            border: 1px solid #263244;
+            border-radius: 18px;
+            padding: 16px;
+            color: #ffffff;
+        }
+
+            .user-card small {
+                color: var(--text-muted-custom);
+                display: block;
+                margin-bottom: 6px;
+            }
+
+        .user-name {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: #065f46;
+            color: #6ee7b7;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .main-wrapper {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            min-height: 100vh;
+            background: #111827;
+        }
+
+        .topbar {
+            min-height: 82px;
+            background: var(--topbar-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 32px;
+            color: #ffffff;
+        }
+
+        .topbar-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .topbar-subtitle {
+            margin: 3px 0 0 0;
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+            .topbar-actions .btn {
+                color: #ffffff;
+                border-color: rgba(255, 255, 255, 0.4);
+            }
+
+                .topbar-actions .btn:hover {
+                    background: rgba(255, 255, 255, 0.15);
+                    color: #ffffff;
+                }
+
+        .content-area {
+            padding: 34px 32px;
+            color: #ffffff;
+        }
+
+            .content-area .card {
+                color: #111827;
+            }
+
+            .content-area .table {
+                color: #111827;
+            }
+
+                .content-area .card .text-muted,
+                .content-area .table .text-muted {
+                    color: #6b7280 !important;
+                }
+
+        .form-label {
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .validation-summary-errors ul {
+            margin-bottom: 0;
+        }
+
+        @@media (max-width: 992px) {
+            .sidebar {
+                width: 230px;
+            }
+
+            .main-wrapper {
+                margin-left: 230px;
+                width: calc(100% - 230px);
+            }
+
+            .topbar {
+                padding: 16px 20px;
+            }
+
+            .content-area {
+                padding: 24px 20px;
+            }
+
+            .topbar-title {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">OBS_Projesi</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+    <div class="app-shell">
+
+        <aside class="sidebar">
+            <div>
+                <a asp-controller="Home" asp-action="Index" class="sidebar-brand">
+                    <div class="brand-icon">✓</div>
+
+                    <div>
+                        <p class="brand-title">Sınav Planlama</p>
+                        <p class="brand-subtitle">OBS Yönetim</p>
+                    </div>
+                </a>
+
+                <nav class="sidebar-nav">
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class='sidebar-link @IsActive("Home")'>
+                        <span class="sidebar-icon">📊</span>
+                        <span>Yönetim Paneli</span>
+                    </a>
+
+                    <a asp-controller="Derslik"
+                       asp-action="Index"
+                       class='sidebar-link @IsActive("Derslik")'>
+                        <span class="sidebar-icon">🏫</span>
+                        <span>Derslik Yönetimi</span>
+                    </a>
+
+                    <a asp-controller="Ders"
+                       asp-action="Index"
+                       class='sidebar-link @IsActive("Ders")'>
+                        <span class="sidebar-icon">📚</span>
+                        <span>Ders Yönetimi</span>
+                    </a>
+
+                    <a asp-controller="Oturum"
+                       asp-action="Index"
+                       class='sidebar-link @IsActive("Oturum")'>
+                        <span class="sidebar-icon">🕘</span>
+                        <span>Oturum Yönetimi</span>
+                    </a>
+
+                    <a asp-controller="Sinav"
+                       asp-action="Index"
+                       class='sidebar-link @IsActive("Sinav")'>
+                        <span class="sidebar-icon">🗓️</span>
+                        <span>Sınav Planlama</span>
+                    </a>
+
+                    <a asp-controller="GozetmenAtama"
+                       asp-action="Index"
+                       class='sidebar-link @IsActive("GozetmenAtama")'>
+                        <span class="sidebar-icon">👥</span>
+                        <span>Gözetmen Atama</span>
+                    </a>
+                    <a asp-controller="Rapor" asp-action="Index" class="menu-link">
+                        <span class="menu-icon">📊</span>
+                        Raporlar
+                    </a>
+
+                    <a asp-controller="VeritabaniProgramlama" asp-action="Index" class="menu-link">
+                       <span class="menu-icon">🛠️</span>
+                       Veritabanı Programlama
+                    </a>
+
+                    <a asp-controller="SinavLog"
+                       asp-action="Index"
+                       class='sidebar-link @IsActive("SinavLog")'>
+                        <span class="sidebar-icon">🧾</span>
+                        <span>Log Kayıtları</span>
+                    </a>
+
+                </nav>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
+
+            <div class="user-card">
+                <small>Giriş yapan kullanıcı</small>
+
+                <div class="user-name">
+                    @(User.Identity != null && User.Identity.IsAuthenticated ? User.Identity.Name : "Kullanıcı")
+                </div>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <span class="role-badge">Admin</span>
+                }
+                else if (User.IsInRole("Viewer"))
+                {
+                    <span class="role-badge">Viewer</span>
+                }
+                else
+                {
+                    <span class="role-badge">Kullanıcı</span>
+                }
+            </div>
+        </aside>
+
+        <main class="main-wrapper">
+            <header class="topbar">
+                <div>
+                    <h1 class="topbar-title">@pageTitle</h1>
+                    <p class="topbar-subtitle">Fakülte sınav planlama ve gözetmen yönetim sistemi</p>
+                </div>
+
+                <div class="topbar-actions">
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-outline-light">
+                        Panel
+                    </a>
+
+                    <a asp-controller="Account"
+                       asp-action="Logout"
+                       class="btn btn-outline-light">
+                        Çıkış
+                    </a>
+
+                </div>
+            </header>
+
+            <section class="content-area">
+                @RenderBody()
+            </section>
         </main>
+
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - OBS_Projesi - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

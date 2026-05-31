@@ -1,0 +1,124 @@
+﻿@model IEnumerable<OBS_Projesi.Models.PersonelMazeret>
+
+@{
+    ViewData["Title"] = "Personel Mazeretleri";
+    var personel = ViewBag.Personel as OBS_Projesi.Models.Personel;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">
+            <i class="bi bi-calendar-x me-2"></i>Personel Mazeretleri
+        </h2>
+        <div class="text-muted">
+            @(personel != null ? $"{personel.Unvan} {personel.Ad} {personel.Soyad} - {personel.Bolum?.BolumAdi}" : "")
+        </div>
+    </div>
+
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Personel Listesine Dön
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-warning text-dark">
+        <strong><i class="bi bi-plus-circle me-1"></i>Yeni Mazeret Ekle</strong>
+    </div>
+
+    <div class="card-body">
+        <form asp-action="MazeretEkle" method="post" class="row g-3">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="personelId" value="@personel?.PersonelID" />
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Tarih</label>
+                <input type="date" name="tarih" class="form-control" required />
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Oturum</label>
+                <select name="oturumId" class="form-select" asp-items="ViewBag.Oturumlar" required>
+                    <option value="">Oturum Seçiniz...</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Mazeret Türü</label>
+                <input type="text" name="mazeretTuru" class="form-control" placeholder="İzinli, Danışmanlık Saati vb." required />
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-warning w-100">
+                    <i class="bi bi-save me-1"></i>Ekle
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <strong><i class="bi bi-list-check me-1"></i>Kayıtlı Mazeretler</strong>
+    </div>
+
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info mb-0">
+                Bu personele ait mazeret kaydı bulunmuyor.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Oturum</th>
+                            <th>Saat Aralığı</th>
+                            <th>Mazeret Türü</th>
+                            <th>Uygunluk</th>
+                            <th class="text-center">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Tarih.ToString("dd.MM.yyyy")</td>
+                                <td>@item.Oturum?.Tanim</td>
+                                <td>
+                                    @item.Oturum?.BaslangicSaat.ToString(@"hh\:mm")
+                                    -
+                                    @item.Oturum?.BitisSaat.ToString(@"hh\:mm")
+                                </td>
+                                <td>@item.MazeretTuru</td>
+                                <td>
+                                    @if (item.UygunMu)
+                                    {
+                                        <span class="badge bg-success">Uygun</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Görev Alamaz</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <form asp-action="MazeretSil" asp-route-id="@item.MazeretID" method="post" class="d-inline"
+                                          onsubmit="return confirm('Bu mazeret kaydını silmek istediğinize emin misiniz?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

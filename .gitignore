@@ -482,3 +482,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Yerel ayar ve hassas veritabaný baðlantý dosyalarý
+appsettings.Development.json
+appsettings.json
+*.microsoft.visualstudio.secrets.json

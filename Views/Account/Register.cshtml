@@ -1,0 +1,173 @@
+﻿@model RegisterViewModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Kayıt Ol";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kayıt Ol - OBS Sınav Sistemi</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #1e3a8a 0, #111827 45%, #020617 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f8fafc;
+            font-family: Arial, sans-serif;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 560px;
+            background: rgba(15, 23, 42, 0.94);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+        }
+
+        .auth-title {
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            color: #e5e7eb;
+            font-weight: 600;
+        }
+
+        .form-control {
+            background-color: #020617;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+
+        .form-control:focus {
+            background-color: #020617;
+            color: #f8fafc;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: #64748b;
+        }
+
+        .btn-primary {
+            border-radius: 12px;
+            padding: 12px;
+            font-weight: 700;
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        .auth-link {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-link:hover {
+            color: #93c5fd;
+        }
+
+        .info-box {
+            background-color: rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(96, 165, 250, 0.28);
+            color: #bfdbfe;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 0.95rem;
+        }
+
+        .text-danger {
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="auth-card">
+        <h2 class="auth-title">Akademik Kayıt</h2>
+        <p class="auth-subtitle">Sisteme giriş yapabilmek için hesap oluşturun.</p>
+
+        <form asp-controller="Account" asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="KullaniciAdi" class="form-label">Kullanıcı Adı</label>
+                <input asp-for="KullaniciAdi"
+                       class="form-control"
+                       placeholder="Örn: admin, zeynep_gozetmen" />
+                <span asp-validation-for="KullaniciAdi" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Sifre" class="form-label">Şifre</label>
+                <input asp-for="Sifre"
+                       type="password"
+                       class="form-control"
+                       placeholder="Şifrenizi giriniz" />
+                <span asp-validation-for="Sifre" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SifreTekrar" class="form-label">Şifre Tekrar</label>
+                <input asp-for="SifreTekrar"
+                       type="password"
+                       class="form-control"
+                       placeholder="Şifrenizi tekrar giriniz" />
+                <span asp-validation-for="SifreTekrar" class="text-danger"></span>
+            </div>
+
+            <div class="info-box mb-4">
+                Personel eşleştirmesi ve rol yetkisi yönetici tarafından yapılır.
+                Yeni hesaplar varsayılan olarak sınırlı yetkiyle oluşturulur.
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                Kayıt Ol
+            </button>
+
+            <div class="text-center mt-4">
+                <span class="text-secondary">Zaten hesabınız var mı?</span>
+                <a asp-controller="Account" asp-action="Login" class="auth-link">
+                    Giriş Yap
+                </a>
+            </div>
+        </form>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+</body>
+</html>

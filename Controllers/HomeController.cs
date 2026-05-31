@@ -1,32 +1,41 @@
-using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OBS_Projesi.Models;
+using Microsoft.EntityFrameworkCore;
+using OBS_Projesi.Data;
 
 namespace OBS_Projesi.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly AppDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(AppDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
+            ViewBag.ToplamDerslik = await _context.Derslikler.CountAsync();
+            ViewBag.AktifDerslik = await _context.Derslikler.CountAsync(x => x.Aktif);
+            ViewBag.ToplamDers = await _context.Dersler.CountAsync();
+            ViewBag.ToplamSinav = await _context.Sinavlar.CountAsync();
+            ViewBag.ToplamPersonel = await _context.Personeller.CountAsync();
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+            ViewBag.AktifToplamKapasite = await _context.Derslikler
+                .Where(x => x.Aktif)
+                .SumAsync(x => (int?)x.Kapasite) ?? 0;
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var yaklasanSinavlar = await _context.Sinavlar
+                .Include(x => x.Ders)
+                .Include(x => x.Oturum)
+                .Where(x => x.Tarih >= DateTime.Today)
+                .OrderBy(x => x.Tarih)
+                .Take(5)
+                .ToListAsync();
+
+            return View(yaklasanSinavlar);
         }
     }
 }

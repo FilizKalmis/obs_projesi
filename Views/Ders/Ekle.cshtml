@@ -1,0 +1,98 @@
+﻿@model OBS_Projesi.Models.Ders
+
+@{
+    ViewData["Title"] = "Yeni Ders Ekle";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Yeni Ders Ekle</h2>
+        <p class="text-muted mb-0">
+            Sınav planlamasında kullanılacak ders bilgilerini girin.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+
+            <form asp-controller="Ders" asp-action="Ekle" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="DersKodu" class="form-label fw-semibold"></label>
+                        <input asp-for="DersKodu" class="form-control" placeholder="Örn: YZM2126" />
+                        <span asp-validation-for="DersKodu" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DersAdi" class="form-label fw-semibold"></label>
+                        <input asp-for="DersAdi" class="form-control" placeholder="Örn: Veritabanı Sistemlerine Giriş" />
+                        <span asp-validation-for="DersAdi" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DersTuru" class="form-label fw-semibold"></label>
+                        <select asp-for="DersTuru" class="form-select">
+                            <option value="">Seçiniz</option>
+                            <option value="Zorunlu">Zorunlu</option>
+                            <option value="Seçmeli">Seçmeli</option>
+                            <option value="Laboratuvar">Laboratuvar</option>
+                        </select>
+                        <span asp-validation-for="DersTuru" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BolumID" class="form-label fw-semibold"></label>
+                        <select asp-for="BolumID" asp-items="ViewBag.Bolumler" class="form-select">
+                            <option value="">Bölüm seçiniz</option>
+                        </select>
+                        <span asp-validation-for="BolumID" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Yariyil" class="form-label fw-semibold"></label>
+                        <select asp-for="Yariyil" class="form-select">
+                            <option value="">Yarıyıl seçiniz</option>
+                            @for (int i = 1; i <= 8; i++)
+                            {
+                                <option value="@i">@i. Yarıyıl</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Yariyil" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="OgrenciSayisi" class="form-label fw-semibold"></label>
+                        <input asp-for="OgrenciSayisi" type="number" class="form-control" placeholder="Örn: 85" />
+                        <span asp-validation-for="OgrenciSayisi" class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary px-4">
+                        Kaydet
+                    </button>
+
+                    <a asp-controller="Ders" asp-action="Index" class="btn btn-outline-secondary px-4">
+                        İptal
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

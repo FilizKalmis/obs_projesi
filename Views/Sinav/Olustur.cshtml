@@ -1,0 +1,83 @@
+﻿@model OBS_Projesi.Models.ViewModels.SinavOlusturViewModel
+
+@{
+    ViewData["Title"] = "Yeni Sınav Oluştur";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1 text-white">Yeni Sınav / Salon Ata</h2>
+        <p class="text-muted mb-0">
+            Ders, tarih ve oturum seçerek yeni sınav oluşturun. Sistem uygun salonları otomatik olarak atar.
+        </p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7 col-md-9">
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Sınav Bilgileri</h5>
+                    <small class="text-muted">
+                        Sınav oluşturulduktan sonra salon ataması otomatik yapılır.
+                    </small>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form asp-controller="Sinav" asp-action="Olustur" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="DersID" class="form-label">Ders</label>
+
+                            <select asp-for="DersID" asp-items="ViewBag.Dersler" class="form-select">
+                                <option value="">Ders Seçiniz</option>
+                            </select>
+
+                            <span asp-validation-for="DersID" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Tarih" class="form-label">Sınav Tarihi</label>
+
+                            <input asp-for="Tarih" type="date" class="form-control" />
+
+                            <span asp-validation-for="Tarih" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="OturumID" class="form-label">Oturum</label>
+
+                            <select asp-for="OturumID" asp-items="ViewBag.Oturumlar" class="form-select">
+                                <option value="">Oturum Seçiniz</option>
+                            </select>
+
+                            <span asp-validation-for="OturumID" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary px-4">
+                                Sınav Oluştur ve Salon Ata
+                            </button>
+
+                            <a asp-controller="Sinav" asp-action="Index" class="btn btn-secondary px-4">
+                                Programa Dön
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,278 @@
+﻿@model OBS_Projesi.Models.ViewModels.SpUdfPanelViewModel
+
+@{
+    ViewData["Title"] = "Veritabanı Programlama";
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<div class="page-header">
+    <div>
+        <h2>Veritabanı Programlama</h2>
+        <p>Salon atama, gözetmen atama ve kontrol işlemleri</p>
+    </div>
+
+    <a asp-controller="Rapor" asp-action="Index" class="btn btn-secondary">
+        Raporlara Dön
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.SonucMesaji))
+{
+    <div class="alert alert-success">
+        @Model.SonucMesaji
+    </div>
+}
+
+<div class="two-column-grid">
+    <div class="card programming-card">
+        <div class="card-header">
+            <h5>Akıllı Salon Ata</h5>
+        </div>
+
+        <div class="card-body">
+            <p>Seçilen sınav için uygun salonları atar.</p>
+
+            @if (isAdmin)
+            {
+                <form asp-controller="VeritabaniProgramlama"
+                      asp-action="AkilliSalonAta"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group">
+                        <label>Sınav</label>
+                        <select name="sinavID" class="form-control" asp-items="ViewBag.Sinavlar">
+                            <option value="">Sınav seçiniz</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Çalıştır
+                    </button>
+                </form>
+            }
+            else
+            {
+                <div class="empty-state">
+                    Viewer kullanıcısı bu işlemi yapamaz.
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card programming-card">
+        <div class="card-header">
+            <h5>Havuzdan Gözetmen Ata</h5>
+        </div>
+
+        <div class="card-body">
+            <p>Seçilen sınav salonuna uygun gözetmen atar.</p>
+
+            @if (isAdmin)
+            {
+                <form asp-controller="VeritabaniProgramlama"
+                      asp-action="GozetmenHavuzundanAta"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group">
+                        <label>Sınav Salonu</label>
+                        <select name="sinavSalonuID" class="form-control" asp-items="ViewBag.SinavSalonlari">
+                            <option value="">Sınav salonu seçiniz</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Çalıştır
+                    </button>
+                </form>
+            }
+            else
+            {
+                <div class="empty-state">
+                    Viewer kullanıcısı bu işlemi yapamaz.
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card programming-card">
+        <div class="card-header">
+            <h5>Yedek Al</h5>
+        </div>
+
+        <div class="card-body">
+            <p>Sistemin güncel yedeğini oluşturur.</p>
+
+            @if (isAdmin)
+            {
+                <form asp-controller="VeritabaniProgramlama"
+                      asp-action="YedekAl"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit" class="btn btn-primary">
+                        Çalıştır
+                    </button>
+                </form>
+            }
+            else
+            {
+                <div class="empty-state">
+                    Viewer kullanıcısı bu işlemi yapamaz.
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card programming-card">
+        <div class="card-header">
+            <h5>Kapasite Kontrol</h5>
+        </div>
+
+        <div class="card-body">
+            <p>Seçilen sınav için salon kapasitesinin yeterli olup olmadığını kontrol eder.</p>
+
+            <form asp-controller="VeritabaniProgramlama"
+                  asp-action="KapasiteKontrol"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label>Sınav</label>
+                    <select asp-for="SinavID" class="form-control" asp-items="ViewBag.Sinavlar">
+                        <option value="">Sınav seçiniz</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Çalıştır
+                </button>
+            </form>
+
+            @if (Model.KapasiteYeterliMi != null)
+            {
+                <div class="result-box">
+                    <strong>Sonuç:</strong>
+                    @(Model.KapasiteYeterliMi == true ? "Kapasite yeterli" : "Kapasite yetersiz")
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card programming-card">
+        <div class="card-header">
+            <h5>Yarıyıl Çakışma Kontrol</h5>
+        </div>
+
+        <div class="card-body">
+            <p>Girilen yarıyıl, tarih ve oturum için sınav çakışmasını kontrol eder.</p>
+
+            <form asp-controller="VeritabaniProgramlama"
+                  asp-action="YariyilCakismaKontrol"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label>Yarıyıl</label>
+                    <input asp-for="Yariyil" class="form-control" placeholder="Örn: 3" />
+                </div>
+
+                <div class="form-group">
+                    <label>Tarih</label>
+                    <input asp-for="Tarih" type="date" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label>Oturum</label>
+                    <select asp-for="OturumID" class="form-control" asp-items="ViewBag.Oturumlar">
+                        <option value="">Oturum seçiniz</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Çalıştır
+                </button>
+            </form>
+
+            @if (Model.YariyilCakismaVarMi != null)
+            {
+                <div class="result-box">
+                    <strong>Sonuç:</strong>
+                    @(Model.YariyilCakismaVarMi == true ? "Çakışma var" : "Çakışma yok")
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card programming-card">
+        <div class="card-header">
+            <h5>Gözetmen Uygunluk Kontrol</h5>
+        </div>
+
+        <div class="card-body">
+            <p>Seçilen gözetmenin ilgili oturum için uygun olup olmadığını kontrol eder.</p>
+
+            <form asp-controller="VeritabaniProgramlama"
+                  asp-action="GozetmenUygunlukKontrol"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label>Gözetmen</label>
+                    <select asp-for="PersonelID" class="form-control" asp-items="ViewBag.Personeller">
+                        <option value="">Gözetmen seçiniz</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Tarih</label>
+                    <input asp-for="Tarih" type="date" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label>Oturum</label>
+                    <select asp-for="OturumID" class="form-control" asp-items="ViewBag.Oturumlar">
+                        <option value="">Oturum seçiniz</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    Çalıştır
+                </button>
+            </form>
+
+            @if (Model.GozetmenUygunMu != null)
+            {
+                <div class="result-box">
+                    <strong>Sonuç:</strong>
+                    @(Model.GozetmenUygunMu == true ? "Gözetmen uygun" : "Gözetmen uygun değil")
+                </div>
+            }
+        </div>
+    </div>
+</div>
